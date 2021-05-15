@@ -1,0 +1,19 @@
+name: DockerImage
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout-repo
+        uses: actions/checkout@v2
+      - name: build-push-image
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{secrets.USERNAMEDOCKERHUB}}
+          password: ${{secrets.BUILDIMAGEDOCKERHUB}}
+          repository: ${{secrets.USERNAMEDOCKERHUB}}/apiexpressjobs
+
