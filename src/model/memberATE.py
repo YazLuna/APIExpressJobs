@@ -1,8 +1,10 @@
-from src.model.connection import Communication
+from src.model.base_model import BaseModel
 from src.services.thrift.ttypes import MemberATERegistryUpdate
 
 
-class ConnectServerMember(Communication):
+class ConnectServerMember(BaseModel):
+    __tablename__ = "MemberATE"
+
     def registry_member(self, member: MemberATERegistryUpdate):
         self.communication_start()
         self.transport.open()
