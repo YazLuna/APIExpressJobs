@@ -1,10 +1,10 @@
 import connexion
-import six
+from flask import Blueprint
 
-from swagger_server.models.service import Service  # noqa: E501
-from swagger_server import util
+service = Blueprint("Services", __name__)
 
 
+@service.route("/services", methods=["POST"])
 def add_service(body, service=None):  # noqa: E501
     """Add a new service to the service catalog
 
@@ -17,13 +17,10 @@ def add_service(body, service=None):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        body = Service.from_dict(connexion.request.get_json())  # noqa: E501
-    if connexion.request.is_json:
-        service = Service.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 
+@service.route("/services", methods=["PUT"])
 def change_service(service=None):  # noqa: E501
     """Change data existing service
 
@@ -34,11 +31,10 @@ def change_service(service=None):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        service = Service.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 
+@service.route("/services", methods=["PATCH"])
 def change_status(service_id, status):  # noqa: E501
     """Change status existing service
 
@@ -54,6 +50,7 @@ def change_status(service_id, status):  # noqa: E501
     return 'do some magic!'
 
 
+@service.route("/services", methods=["GET"])
 def find_services(filter):  # noqa: E501
     """Return a list of Services
 
@@ -67,6 +64,7 @@ def find_services(filter):  # noqa: E501
     return 'do some magic!'
 
 
+@service.route("/services/{serviceId}", methods=["GET"])
 def get_service_by_id(service_id):  # noqa: E501
     """Returns a single service
 
