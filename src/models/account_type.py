@@ -7,8 +7,8 @@ from src.routes.responses_rest import ResponsesREST
 class AccountType:
     def __init__(self):
         self.id_account_type = ""
-        self.account_status = ""
-        self.account_type = ""
+        self.account_status = 1
+        self.account_type = 1
         self.id_account = ""
         self.connect = Connection.build_from_static()
 
@@ -51,6 +51,16 @@ class AccountType:
         if list_accounts:
             result = True
         return result
+
+    def change_status(self):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "UPDATE AccountType SET accountStatus = %s WHERE idAccountType = %s "
+        param = [self.account_status,
+                 self.id_account_type]
+        result = self.connect.send_query(query, param)
+        if result:
+            results = ResponsesREST.SUCCESSFUL.value
+        return results
 
     def json_account(self):
         json_converter = {"email": self.account_status, "account_status": self.account_type,
