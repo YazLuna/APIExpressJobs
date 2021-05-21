@@ -20,6 +20,16 @@ class Account:
         self.id_account = ""
         self.connect = Connection.build_from_static()
 
+    def login(self):
+        query = "SELECT idAccount FROM Account WHERE username = %s AND password = %s"
+        param = [self.username,
+                 self.password]
+        list_accounts = self.connect.select(query, param)
+        account = False
+        if list_accounts:
+            account = True
+        return account
+
     def add_memberATE(self):
         results = ResponsesREST.SERVER_ERROR.value
         if self.not_exist_account():
@@ -66,13 +76,27 @@ class Account:
             account.date_birth = list_accounts["dateBirth"]
         return account
 
-    def consult_list_accounts(self):
-        pass
+    def consult_list_accounts(self, filter):
+        query = "SELECT * FROM Account A INNER JOIN MemberATE M ON " \
+                "A.idMemberATE = M.idMemberATE WHERE M.email = %s"
+        param = [filter]
+        list_account = self.connect.select(query, param)
+        if list_account:
+            account_list = []
+            for accounts in list_account:
+                account = Account()
+                account.id_request = accounts["idRequest"]
+                account.email = account_list["email"]
+                account.name = account_list["name"]
+                account.lastName = account_list["lastName"]
+                account.date_birth = account_list["dateBirth"]
+                account_list.append(account)
+        return list_account
 
     def update_account(self):
         pass
 
-    def delete_account(self):
+    def change_status(self):
         pass
 
     def not_exist_account(self):
@@ -87,6 +111,5 @@ class Account:
         return result
 
     def json_account(self):
-        json_converter = {"email": self.email, "name": self.name, "lastName": self.lastName,
+        return {"email": self.email, "name": self.name, "lastName": self.lastName,
                           "dateBirth": self.date_birth}
-        return json.dumps(json_converter)
