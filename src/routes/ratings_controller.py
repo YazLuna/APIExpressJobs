@@ -1,33 +1,57 @@
-from flask import Blueprint
+import json
+
+from flask import Blueprint, request, Response
+
+from src.models.account_role import AccountRole
+from src.models.rating import Rating
+from src.routes.auth import Auth
+from src.routes.responses_rest import ResponsesREST
 
 rating = Blueprint("Ratings", __name__)
 
 
 @rating.route("/ratings", methods=["POST"])
-def add_rating(body, rating=None):  # noqa: E501
-    """Add a new rating to the service
-
-    Add a new rating to the request of service # noqa: E501
-
-    :param body: Rating object that needs to be added to the request
-    :type body: dict | bytes
-    :param rating: The rating to create
-    :type rating: dict | bytes
-
-    :rtype: None
-    """
-    return 'do some magic!'
+@Auth.requires_token
+def add_rating():
+    json_values = request.json
+    values_required = {"comment", "rating", "idRequest"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        rating_add = Rating()
+        rating_add.name = json_values["comment"]
+        rating_add.description = json_values["rating"]
+        rating_add.slogan = json_values["idRequest"]
+        result = rating_add.add_rating()
+        if result == ResponsesREST.CREATED.value:
+            response = Response(json.dumps(rating_add.json_rating()), status=ResponsesREST.CREATED.value,
+                                mimetype="application/json")
+        else:
+            response = Response(status=result)
+    return response
 
 
 @rating.route("/ratings", methods=["GET"])
-def find_rating(id_service):  # noqa: E501
-    """Return a list of rating
-
-    Returns the average rating of a service # noqa: E501
-
-    :param id_service: Service of which you want to know the rating
-    :type id_service: int
-
-    :rtype: InlineResponse2001
-    """
-    return 'do some magic!'
+@Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
+def find_ratings():
+    json_values = request.json
+    values_required = {"idService"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        get_ratings = Rating()
+        result = get_ratings.find_ratings(json_values["idService"])
+        if result == ResponsesREST.INVALID_REQUEST.value:
+            response = Response(status=result)
+        else:
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(status=result)
+            else:
+                list_ratings = []
+                for ratings_found in result:
+                    ratings_found.json_rating()
+                    list_ratings.append(ratings_found)
+                response = Response(json.dumps(list_ratings), status=ResponsesREST.SUCCESSFUL.value,
+                                    mimetype="application/json")
+    return response

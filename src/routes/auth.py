@@ -56,13 +56,13 @@ class Auth:
         return decorator
 
     @staticmethod
-    def generate_token(account: Account, role) -> str:
+    def generate_token(account: Account) -> str:
         if Auth.secret_password is None:
             Auth.set_password()
         timestamp = datetime.now().strftime("%H:%M:%S")
         value: str = account.email + "/"
         value += account.password + "/"
-        value += str(role) + "/"
+        value += account.memberATE_type + "/"
         value += timestamp
         return Auth.encode(value, Auth.secret_password)
 
