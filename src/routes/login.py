@@ -18,9 +18,10 @@ def create_token():
         account_login = Account()
         account_login.username = json_values["username"]
         account_login.password = json_values["password"]
+        account_login.memberATE_type = json_values["memberATEType"]
         result = account_login.login()
         if result:
-            token = Auth.generate_token(account_login, 1)
+            token = Auth.generate_token(account_login)
             session.permanent = True
             session["token"] = token
             response = Response(json.dumps({"token": token}), status=ResponsesREST.SUCCESSFUL.value,

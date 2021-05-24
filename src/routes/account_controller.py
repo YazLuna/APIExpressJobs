@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, request, Response
 
 from src.models.account import Account
-from src.models.account_type import AccountType
+from src.models.account_role import AccountRole
 from src.routes.auth import Auth
 from src.routes.responses_rest import ResponsesREST
 
@@ -13,9 +13,8 @@ account = Blueprint("Accounts", __name__)
 @account.route("/accounts", methods=["POST"])
 def add_account():
     json_values = request.json
-    #obligatorios
     values_required = {"username", "password", "name", "lastName", "dateBirth",
-              "email", "id_city"}
+                       "email", "idCity", "memberATEStatus", "memberATEType"}
     response = Response(status=ResponsesREST.INVALID_INPUT.value)
     if all(key in json_values for key in values_required):
         # validator
@@ -26,52 +25,102 @@ def add_account():
         account_add.lastName = json_values["lastName"]
         account_add.date_birth = json_values["dateBirth"]
         account_add.email = json_values["email"]
-        account_add.id_city = json_values["id_city"]
-        if json_values["id_resource"]:
-            account_add.id_resource = json_values["id_resource"]
+        account_add.id_city = json_values["idCity"]
+        account_add.memberATE_type = json_values["memberATEType"]
+        account_add.memberATE_status = json_values["memberATEStatus"]
+        if json_values["idResource"]:
+            account_add.id_resource = json_values["idResource"]
         result = account_add.add_memberATE()
         if result == ResponsesREST.CREATED.value:
-            object_account = account_add.json_account()
-            object_account["status"] = 1
-            object_account["member_type"] = 1
-            response = Response(json.dumps(object_account), status=ResponsesREST.CREATED.value,
+            response = Response(json.dumps(account_add.json_account()), status=ResponsesREST.CREATED.value,
                                 mimetype="application/json")
         else:
             response = Response(status=result)
     return response
 
 
-@account.route("/accounts", methods=["PATCH"])
+@account.route("/accounts/<idAccount>", methods=["PATCH"])
 @Auth.requires_token
-@Auth.requires_role(1)
-def change_status_account():
+def change_status_account(idAccount):
     json_values = request.json
-    values = {"id_account", "status"}
+    values_required = {"memberATEStatus"}
     response = Response(status=ResponsesREST.INVALID_INPUT.value)
-    if all(key in json_values for key in values):
+    if all(key in json_values for key in values_required):
         # validator
-        account_status = AccountType()
-        account_status.id_account = json_values["id_account"]
-        account_status.account_status = json_values["status"]
+        account_status = Account()
+        account_status.id_memberATE = idAccount
+        account_status.memberATE_status = json_values["memberATEStatus"]
         result = account_status.change_status()
-        if result == ResponsesREST.SUCCESSFUL.value:
-            response = Response(account_status.json_account(), status=ResponsesREST.CREATED.value,
-                                mimetype="application/json")
-        else:
-            response = Response(status=result)
+        response = Response(status=result)
     return response
 
 
 @account.route("/accounts", methods=["GET"])
+@Auth.requires_token
 def find_accounts():
-    pass
+    json_values = request.json
+    values_required = {"memberATEStatus", "filter", "criterion"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        get_accounts = Account()
+        result = get_accounts.consult_list_accounts(json_values["memberATEStatus"], json_values["filter"],
+                                                    json_values["criterion"])
+        if result == ResponsesREST.INVALID_REQUEST.value:
+            response = Response(status=result)
+        else:
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(status=result)
+            else:
+                list_accounts = []
+                for account_found in result:
+                    account_found.json_account()
+                    list_accounts.append(account_found)
+                response = Response(json.dumps(list_accounts), status=ResponsesREST.SUCCESSFUL.value,
+                                    mimetype="application/json")
+    return response
 
 
-@account.route("/accounts/{accountId}", methods=["GET"])
-def get_account_by_id():
-    pass
+@account.route("/accounts/<accountId>", methods=["GET"])
+@Auth.requires_token
+def get_account_by_id(accountId):
+    account_get = Account()
+    account_get.id_account = accountId
+    result = account_get.consult_account()
+    if result == ResponsesREST.INVALID_INPUT.value:
+        response = Response(status=result)
+    else:
+        if result == ResponsesREST.SERVER_ERROR.value:
+            response = Response(status=result)
+        else:
+            response = Response(json.dumps(result.json_account()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
 
 
-@account.route("/accounts", methods=["PUT"])
-def change_account():
-    pass
+@account.route("/accounts/<accountId>", methods=["PUT"])
+@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
+@Auth.requires_token
+def change_account(accountId):
+    json_values = request.json
+    values_required = {"username", "password", "name", "lastName", "dateBirth",
+                       "email", "idCity"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        account_change = Account()
+        account_change.id_memberATE = accountId
+        account_change.username = json_values["username"]
+        account_change.password = json_values["password"]
+        account_change.name = json_values["name"]
+        account_change.lastName = json_values["lastName"]
+        account_change.date_birth = json_values["dateBirth"]
+        account_change.email = json_values["email"]
+        account_change.id_city = json_values["idCity"]
+        result = account_change.update_account()
+        if result == ResponsesREST.SUCCESSFUL.value:
+            response = Response(json.dumps(account_change.json_account()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+        else:
+            response = Response(status=result)
+    return response

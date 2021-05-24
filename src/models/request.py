@@ -1,6 +1,5 @@
-import json
-
 from src.connect_database.Connection import Connection
+from src.models.request_status import RequestStatus
 from src.routes.responses_rest import ResponsesREST
 
 
@@ -9,7 +8,7 @@ class Request:
         self.id_request = ""
         self.address = ""
         self.date = ""
-        self.request_status = 1
+        self.request_status = RequestStatus.REQUEST.value
         self.time = ""
         self.trouble = ""
         self.id_memberATE = ""
@@ -18,9 +17,8 @@ class Request:
 
     def add_request(self):
         results = ResponsesREST.SERVER_ERROR.value
-        # Validar que exista el id
         query = "INSERT INTO Request (address, date, requestStatus, time, trouble, idMember, idService) " \
-                "VALUES (%s, %s, %s, %s, %s, %s, %s); SELECT @@IDENTITY AS idRequest "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s); "
         param = [self.address,
                  self.date,
                  self.request_status,
@@ -28,11 +26,20 @@ class Request:
                  self.trouble,
                  self.id_memberATE,
                  self.id_service]
-        result = self.connect.select(query, param)
+        result = self.connect.send_query(query, param)
         if result:
-            self.id_request = result[0]["idRequest"]
+            self.id_request = self.get_id()
             results = ResponsesREST.CREATED.value
         return results
+
+    def get_id(self):
+        query = "SELECT idRequest FROM Request order by idRequest desc limit 1;"
+        response = self.connect.select(query)
+        request = Request()
+        if response:
+            id_list = response[0]
+            request.id_request = id_list["idRequest"]
+        return request.id_request
 
     def get_request_by_id(self):
         query = "SELECT address, date, requestStatus, time, trouble, idMember, idService " \
@@ -52,25 +59,39 @@ class Request:
             request.id_memberATE = list_request["idMember"]
         return request
 
-    def find_request(self, filter):
-        query = "SELECT address, date, requestStatus, time, trouble, idMember, idService, idRequest " \
-                "FROM Request WHERE date = %s"
-        param = [filter]
+    def find_request(self, request_status, filter_search, criterion):
+        results = ResponsesREST.SERVER_ERROR.value
+        if criterion == "memberATE":
+            query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
+                    "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
+                    "MemberATE MA ON R.idMember = MA.idMemberATE WHERE R.requestStatus = %s " \
+                    "AND MA.name = %s;"
+        else:
+            query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
+                    "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
+                    "Service S on R.idService = S.idService WHERE R.requestStatus = %s " \
+                    "AND S.name = %s;"
+        param = [request_status,
+                 filter_search]
         list_request = self.connect.select(query, param)
-        request_list = []
         if list_request:
+            request_list = []
             for requests in list_request:
                 request = Request()
-                request.id_request = requests["idRequest"]
-                request.address = requests["address"]
-                request.date = requests["date"]
-                request.request_status = requests["requestStatus"]
-                request.time = requests["time"]
-                request.trouble = requests["trouble"]
                 request.id_service = requests["idService"]
-                request.id_memberATE = requests["idMember"]
+                request.name = requests["name"]
+                request.description = requests["description"]
+                request.slogan = requests["slogan"]
+                request.type_service = requests["typeService"]
+                request.working_hours = requests["workingHours"]
+                request.service_status = requests["serviceStatus"]
+                request.minimal_cost = requests["minimalCost"]
+                request.maximum_cost = requests["maximumCost"]
                 request_list.append(request)
-        return request_list
+            results = request_list
+        else:
+            results = ResponsesREST.INVALID_REQUEST.value
+        return results
 
     def change_status(self):
         results = ResponsesREST.SERVER_ERROR.value
@@ -83,6 +104,7 @@ class Request:
         return results
 
     def json_request(self):
-        json_converter = {"address": self.address, "date": self.date, "request_status": self.request_status,
-                          "time": self.time, "trouble": self.trouble}
-        return json.dumps(json_converter)
+        return {"idRequest": self.id_request, "address": self.address,
+                "date": self.date, "request_status": self.request_status,
+                "time": self.time, "trouble": self.trouble,
+                "idMemberATE": self.id_memberATE, "idService": self.id_service}

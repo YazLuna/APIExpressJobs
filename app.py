@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
 from flask import Flask
 from flask_cors import CORS
@@ -10,7 +10,7 @@ from src.routes.login import login
 from src.routes.messages_controller import message
 from src.routes.ratings_controller import rating
 from src.routes.reports_controller import report
-from src.routes.requests_controller import request
+from src.routes.requests_controller import requestService
 from src.routes.resources_controller import resource
 from src.routes.services_controller import service
 
@@ -22,7 +22,7 @@ app.register_blueprint(employee)
 app.register_blueprint(message)
 app.register_blueprint(rating)
 app.register_blueprint(report)
-app.register_blueprint(request)
+app.register_blueprint(requestService)
 app.register_blueprint(resource)
 app.register_blueprint(service)
 app.register_blueprint(login)
