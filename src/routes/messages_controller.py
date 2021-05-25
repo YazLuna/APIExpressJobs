@@ -1,18 +1,57 @@
-from flask import Blueprint
+import json
+
+from flask import Blueprint, request, Response
+
+from src.models.message import Message
+from src.routes.auth import Auth
+from src.routes.responses_rest import ResponsesREST
 
 message = Blueprint("Messages", __name__)
 
 
 @message.route("/messages", methods=["POST"])
+@Auth.requires_token
 def add_message():
-    pass
+    json_values = request.json
+    values_required = {"message", "idChat", "dateTime", "memberATEType"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        message_add = Message()
+        message_add.id_service = json_values["message"]
+        message_add.id_memberATE = json_values["idChat"]
+        message_add.id_request = json_values["dateTime"]
+        message_add.id_request = json_values["memberType"]
+        result = message_add.add_message()
+        if result == ResponsesREST.CREATED.value:
+            response = Response(json.dumps(message_add.json_message()), status=ResponsesREST.CREATED.value,
+                                mimetype="application/json")
+        else:
+            response = Response(status=result)
+    return response
 
 
 @message.route("/messages", methods=["GET"])
-def find_messages(member_ate):  # noqa: E501
-    pass
-
-
-@message.route("/messages/{messageId}", methods=["GET"])
-def get_message_by_id(message_id):  # noqa: E501
-    pass
+@Auth.requires_token
+def get_messages():
+    json_values = request.json
+    values_required = {"idChat"}
+    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    if all(key in json_values for key in values_required):
+        # validator
+        get_message = Message()
+        get_message.id_memberATE = json_values["idChat"]
+        result = get_message.get_messages_list()
+        if result == ResponsesREST.INVALID_REQUEST.value:
+            response = Response(status=result)
+        else:
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(status=result)
+            else:
+                list_chat = []
+                for message_found in result:
+                    message_found.json_message()
+                    list_chat.append(message_found)
+                response = Response(json.dumps(list_chat), status=ResponsesREST.SUCCESSFUL.value,
+                                    mimetype="application/json")
+    return response
