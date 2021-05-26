@@ -1,15 +1,13 @@
 from flask import Blueprint, request, Response
 
 from src.models.account import Account
-from src.routes.auth import Auth
 from src.routes.responses_rest import ResponsesREST
 
 email = Blueprint("Emails", __name__)
 
 
 @email.route("/emails", methods=["POST"])
-
-def send_message_to_recover_account():
+def send_message_to_account():
     json_values = request.json
     values = {"email", "messageSend"}
     response = Response(status=ResponsesREST.INVALID_INPUT.value)

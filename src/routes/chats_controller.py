@@ -2,6 +2,7 @@ import json
 
 from flask import Blueprint, request, Response
 
+from src.models.account_role import AccountRole
 from src.models.chat import Chat
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
@@ -12,6 +13,7 @@ chat = Blueprint("Chats", __name__)
 
 @chat.route("/chats", methods=["POST"])
 @Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
 def add_chat():
     json_values = request.json
     values_required = {"idService", "idMemberATEClient", "idRequest"}

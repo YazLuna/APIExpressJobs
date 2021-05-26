@@ -11,7 +11,6 @@ city = Blueprint("Cites", __name__)
 
 
 @city.route("/cities", methods=["POST"])
-@Auth.requires_token
 def add_city():
     json_values = request.json
     values_required = {"name", "idState"}
@@ -32,7 +31,6 @@ def add_city():
 
 
 @city.route("/cities/<cityId>", methods=["GET"])
-@Auth.requires_token
 def get_city_by_id(cityId):
     city_get = City()
     city_get.id_city = cityId
@@ -49,7 +47,6 @@ def get_city_by_id(cityId):
 
 
 @city.route("/cities", methods=["GET"])
-@Auth.requires_token
 def get_cities():
     json_values = request.json
     values_required = {"idState"}

@@ -11,7 +11,6 @@ state = Blueprint("States", __name__)
 
 
 @state.route("/states/<stateId>", methods=["GET"])
-@Auth.requires_token
 def get_state_by_id(stateId):
     state_get = State()
     state_get.id_state = stateId
@@ -28,7 +27,6 @@ def get_state_by_id(stateId):
 
 
 @state.route("/states", methods=["GET"])
-@Auth.requires_token
 def get_states():
     json_values = request.json
     values_required = {"idCountry"}

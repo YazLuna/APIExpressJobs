@@ -6,8 +6,19 @@ from cryptography.fernet import Fernet
 from flask import session, Response, request
 
 from src.models.account import Account
+from src.models.account_role import AccountRole
 from src.routes.exception_responses_json import json_not_authorized, json_token_errors
 from src.routes.responses_rest import ResponsesREST
+
+
+def get_member_type(memberATEType):
+    result = AccountRole.CLIENT.name
+    if memberATEType == AccountRole.MANAGER.value:
+        result = AccountRole.MANAGER.name
+    else:
+        if memberATEType == AccountRole.CLIENT_EMPLOYEE.value:
+            result = AccountRole.CLIENT_EMPLOYEE.name
+    return result
 
 
 class Auth:
@@ -70,9 +81,9 @@ class Auth:
         if Auth.secret_password is None:
             Auth.set_password()
         timestamp = datetime.now().strftime("%H:%M:%S")
-        value: str = account.email + "/"
+        value: str = account.username + "/"
         value += account.password + "/"
-        value += account.memberATE_type + "/"
+        value += get_member_type(account.memberATE_type) + "/"
         value += timestamp
         return Auth.encode(value, Auth.secret_password)
 
@@ -81,7 +92,7 @@ class Auth:
         decoded_token = Auth.decode(token, Auth.secret_password)
         decoded_token = decoded_token.split("/")
         return {
-            "email": decoded_token[0],
+            "username": decoded_token[0],
             "password": decoded_token[1],
             "role": decoded_token[2]
         }
