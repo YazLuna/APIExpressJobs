@@ -11,7 +11,6 @@ country = Blueprint("Countries", __name__)
 
 
 @country.route("/countries/<countryId>", methods=["GET"])
-@Auth.requires_token
 def get_country_by_id(countryId):
     country_get = Country()
     country_get.id_state = countryId
@@ -28,7 +27,6 @@ def get_country_by_id(countryId):
 
 
 @country.route("/countries", methods=["GET"])
-@Auth.requires_token
 def get_countries():
     get_country = Country()
     result = get_country.find_countries()

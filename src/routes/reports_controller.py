@@ -13,6 +13,7 @@ report = Blueprint("Reports", __name__)
 
 @report.route("/reports", methods=["POST"])
 @Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
 def add_report():
     json_values = request.json
     values_required = {"reason", "idService", "idMemberATE"}

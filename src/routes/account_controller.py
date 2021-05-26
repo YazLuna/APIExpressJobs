@@ -54,13 +54,13 @@ def change_status_account(idAccount):
         account_status.id_memberATE = idAccount
         account_status.memberATE_status = json_values["memberATEStatus"]
         result = account_status.change_status()
-        response = Response(json.dumps(json_error(result)),
-                            status=result, mimetype="application/json")
+        response = Response(status=result)
     return response
 
 
 @account.route("/accounts", methods=["GET"])
 @Auth.requires_token
+@Auth.requires_role(AccountRole.MANAGER.name)
 def find_accounts():
     json_values = request.json
     values_required = {"memberATEStatus", "filter", "criterion"}
@@ -104,7 +104,6 @@ def get_account_by_id(accountId):
 
 
 @account.route("/accounts/<accountId>", methods=["PUT"])
-@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 @Auth.requires_token
 def change_account(accountId):
     json_values = request.json

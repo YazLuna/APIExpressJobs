@@ -22,13 +22,15 @@ class Account:
         self.connect = Connection.build_from_static()
 
     def login(self):
-        query = "SELECT idAccount FROM Account WHERE username = %s AND password = %s"
+        query = "SELECT memberATEType FROM MemberATE WHERE username = %s AND password = %s"
         param = [self.username,
                  self.password]
         list_accounts = self.connect.select(query, param)
         account = False
         if list_accounts:
-            account = True
+            account = Account()
+            account_found = list_accounts[0]
+            account.memberATE_type = account_found["memberATEType"]
         return account
 
     def send_message(self, code):
