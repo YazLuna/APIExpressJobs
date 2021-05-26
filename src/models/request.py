@@ -42,11 +42,11 @@ class Request:
         return request.id_request
 
     def get_request_by_id(self):
+        request = ResponsesREST.SERVER_ERROR.value
         query = "SELECT address, date, requestStatus, time, trouble, idMember, idService " \
                 "FROM Request WHERE idRequest = %s"
         param = [self.id_request]
         list_request = self.connect.select(query, param)
-        request = None
         if list_request:
             request = Request()
             list_request = list_request[0]
@@ -57,6 +57,8 @@ class Request:
             request.trouble = list_request["trouble"]
             request.id_service = list_request["idService"]
             request.id_memberATE = list_request["idMember"]
+        else:
+            request = ResponsesREST.NOT_FOUND.value
         return request
 
     def find_request(self, request_status, filter_search, criterion):
@@ -90,7 +92,7 @@ class Request:
                 request_list.append(request)
             results = request_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def change_status(self):

@@ -42,7 +42,6 @@ class Report:
 
     def consult_list_reports(self, filter_search, criterion):
         results = ResponsesREST.SERVER_ERROR.value
-        query = None
         if criterion == "memberATE":
             query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date " \
                     "FROM Report R INNER JOIN MemberATE MA ON R.idMemberATE = MA.idMemberATE " \
@@ -57,22 +56,19 @@ class Report:
                     query = "SELECT idReport, reason, idMemberATE, idService, date " \
                             "FROM Report WHERE date = %s;"
         param = [filter_search]
-        if query is None:
-            results = ResponsesREST.INVALID_INPUT.value
+        list_reports = self.connect.select(query, param)
+        if list_reports:
+            reports_list = []
+            for reports in list_reports:
+                report = Report()
+                report.id_service = reports["idService"]
+                report.reason = reports["reason"]
+                report.date = reports["date"]
+                report.id_memberATE = reports["idMemberATE"]
+                reports_list.append(report)
+            results = reports_list
         else:
-            list_reports = self.connect.select(query, param)
-            if list_reports:
-                reports_list = []
-                for reports in list_reports:
-                    report = Report()
-                    report.id_service = reports["idService"]
-                    report.reason = reports["reason"]
-                    report.date = reports["date"]
-                    report.id_memberATE = reports["idMemberATE"]
-                    reports_list.append(report)
-                results = reports_list
-            else:
-                results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def consult_report(self):
@@ -89,7 +85,7 @@ class Report:
             report.id_memberATE = reports["idMemberATE"]
             results = report
         else:
-            results = ResponsesREST.INVALID_INPUT.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_report(self):

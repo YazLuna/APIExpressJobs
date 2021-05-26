@@ -5,6 +5,7 @@ from flask import Blueprint, request, Response
 from src.models.account import Account
 from src.models.account_role import AccountRole
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 account = Blueprint("Accounts", __name__)
@@ -15,7 +16,8 @@ def add_account():
     json_values = request.json
     values_required = {"username", "password", "name", "lastName", "dateBirth",
                        "email", "idCity", "memberATEStatus", "memberATEType"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         account_add = Account()
@@ -35,7 +37,7 @@ def add_account():
             response = Response(json.dumps(account_add.json_account()), status=ResponsesREST.CREATED.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -44,14 +46,16 @@ def add_account():
 def change_status_account(idAccount):
     json_values = request.json
     values_required = {"memberATEStatus"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         account_status = Account()
         account_status.id_memberATE = idAccount
         account_status.memberATE_status = json_values["memberATEStatus"]
         result = account_status.change_status()
-        response = Response(status=result)
+        response = Response(json.dumps(json_error(result)),
+                            status=result, mimetype="application/json")
     return response
 
 
@@ -60,17 +64,18 @@ def change_status_account(idAccount):
 def find_accounts():
     json_values = request.json
     values_required = {"memberATEStatus", "filter", "criterion"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         get_accounts = Account()
         result = get_accounts.consult_list_accounts(json_values["memberATEStatus"], json_values["filter"],
                                                     json_values["criterion"])
-        if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(status=result)
+        if result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(status=result)
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 list_accounts = []
                 for account_found in result:
@@ -87,11 +92,11 @@ def get_account_by_id(accountId):
     account_get = Account()
     account_get.id_account = accountId
     result = account_get.consult_account()
-    if result == ResponsesREST.INVALID_INPUT.value:
-        response = Response(status=result)
+    if result == ResponsesREST.NOT_FOUND.value:
+        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     else:
         if result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             response = Response(json.dumps(result.json_account()), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
@@ -105,7 +110,8 @@ def change_account(accountId):
     json_values = request.json
     values_required = {"username", "password", "name", "lastName", "dateBirth",
                        "email", "idCity"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         account_change = Account()
@@ -122,5 +128,5 @@ def change_account(accountId):
             response = Response(json.dumps(account_change.json_account()), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response

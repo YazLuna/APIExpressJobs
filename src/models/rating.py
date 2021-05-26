@@ -49,7 +49,7 @@ class Rating:
                 rating_list.append(rating)
             results = rating_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_rating(self):

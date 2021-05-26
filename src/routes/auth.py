@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from functools import update_wrapper
 
@@ -5,6 +6,7 @@ from cryptography.fernet import Fernet
 from flask import session, Response, request
 
 from src.models.account import Account
+from src.routes.exception_responses_json import json_not_authorized, json_token_errors
 from src.routes.responses_rest import ResponsesREST
 
 
@@ -26,12 +28,18 @@ class Auth:
                     session.modified = True
                     response = operation(*args, **kwargs)
                 else:
-                    response = Response(status=ResponsesREST.NOT_AUTHENTICATED.value)
+                    response = Response(json.dumps(json_token_errors(ResponsesREST.NOT_AUTHENTICATED.value)),
+                                        status=ResponsesREST.NOT_AUTHENTICATED.value,
+                                        mimetype="application/json")
             except KeyError:
                 if token is not None and saved_token is None:
-                    response = Response(status=ResponsesREST.TIME_OUT.value)
+                    response = Response(json.dumps(json_token_errors(ResponsesREST.TIME_OUT.value)),
+                                        status=ResponsesREST.TIME_OUT.value,
+                                        mimetype="application/json")
                 else:
-                    response = Response(status=ResponsesREST.NOT_AUTHENTICATED.value)
+                    response = Response(json.dumps(json_token_errors(ResponsesREST.NOT_AUTHENTICATED.value)),
+                                        status=ResponsesREST.NOT_AUTHENTICATED.value,
+                                        mimetype="application/json")
             return response
 
         return update_wrapper(verify_auth, operation)
@@ -46,9 +54,11 @@ class Auth:
                     if str(values["role"]) == str(role):
                         response = operation(*args, **kwargs)
                     else:
-                        response = Response(status=ResponsesREST.NOT_AUTHORIZED.value)
+                        response = Response(json.dumps(json_not_authorized()), status=ResponsesREST.NOT_AUTHORIZED.value,
+                                            mimetype="application/json")
                 else:
-                    response = Response(status=ResponsesREST.NOT_AUTHORIZED.value)
+                    response = Response(json.dumps(json_not_authorized()), status=ResponsesREST.NOT_AUTHORIZED.value,
+                                        mimetype="application/json")
                 return response
 
             return update_wrapper(verify_role, operation)

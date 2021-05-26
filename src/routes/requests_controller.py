@@ -5,6 +5,7 @@ from flask import Blueprint, request, Response
 from src.models.account_role import AccountRole
 from src.models.request import Request
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 requestService = Blueprint("Requests", __name__)
@@ -16,7 +17,8 @@ requestService = Blueprint("Requests", __name__)
 def add_request():
     json_values = request.json
     values_required = {"address", "date", "time", "trouble", "idMemberATE", "idService"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         request_add = Request()
@@ -32,7 +34,7 @@ def add_request():
             response = Response(json.dumps(request_add.json_request()), status=ResponsesREST.CREATED.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -41,14 +43,15 @@ def add_request():
 def change_status_request(requestId):
     json_values = request.json
     values_required = {"requestStatus"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         request_change_status = Request()
         request_change_status.id_request = requestId
         request_change_status.request_status = json_values["requestStatus"]
         result = request_change_status.change_status()
-        response = Response(status=result)
+        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -57,17 +60,18 @@ def change_status_request(requestId):
 def find_requests():
     json_values = request.json
     values_required = {"requestStatus", "filter", "criterion"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         get_request = Request()
         result = get_request.find_request(json_values["requestStatus"], json_values["filter"],
                                           json_values["criterion"])
         if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(status=result)
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 list_requests = []
                 for request_found in result:
@@ -85,10 +89,10 @@ def get_request_by_id(requestId):
     request_get.id_request = requestId
     result = request_get.get_request_by_id()
     if result == ResponsesREST.INVALID_INPUT.value:
-        response = Response(status=result)
+        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     else:
         if result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             response = Response(json.dumps(result.json_request()), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
