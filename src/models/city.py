@@ -42,7 +42,7 @@ class City:
             city.id_state = cities["idState"]
             results = city
         else:
-            results = ResponsesREST.INVALID_INPUT.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def find_cities(self):
@@ -60,7 +60,7 @@ class City:
                 cities_list.append(city)
             results = cities_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_city(self):

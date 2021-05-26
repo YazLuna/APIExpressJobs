@@ -4,6 +4,7 @@ from flask import Blueprint, request, Response
 
 from src.models.message import Message
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 message = Blueprint("Messages", __name__)
@@ -14,7 +15,8 @@ message = Blueprint("Messages", __name__)
 def add_message():
     json_values = request.json
     values_required = {"message", "idChat", "dateTime", "memberATEType"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         message_add = Message()
@@ -27,7 +29,7 @@ def add_message():
             response = Response(json.dumps(message_add.json_message()), status=ResponsesREST.CREATED.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -36,17 +38,18 @@ def add_message():
 def get_messages():
     json_values = request.json
     values_required = {"idChat"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         get_message = Message()
         get_message.id_memberATE = json_values["idChat"]
         result = get_message.get_messages_list()
         if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(status=result)
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 list_chat = []
                 for message_found in result:

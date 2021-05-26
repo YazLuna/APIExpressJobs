@@ -4,6 +4,7 @@ from flask import Blueprint, request, Response, session
 
 from src.models.account import Account
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 login = Blueprint("Logins", __name__)
@@ -13,7 +14,8 @@ login = Blueprint("Logins", __name__)
 def create_token():
     json_values = request.json
     values_required = {"username", "password"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         account_login = Account()
         account_login.username = json_values["username"]
@@ -27,5 +29,5 @@ def create_token():
             response = Response(json.dumps({"token": token}), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=request, mimetype="application/json")
     return response

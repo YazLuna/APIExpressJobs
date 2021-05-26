@@ -4,6 +4,7 @@ from flask import Blueprint, request, Response
 
 from src.models.state import State
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 state = Blueprint("States", __name__)
@@ -15,11 +16,11 @@ def get_state_by_id(stateId):
     state_get = State()
     state_get.id_state = stateId
     result = state_get.get_state()
-    if result == ResponsesREST.INVALID_INPUT.value:
-        response = Response(status=result)
+    if result == ResponsesREST.NOT_FOUND.value:
+        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     else:
         if result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             response = Response(json.dumps(result.json_state()), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
@@ -31,17 +32,18 @@ def get_state_by_id(stateId):
 def get_states():
     json_values = request.json
     values_required = {"idCountry"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         get_state = State()
         get_state.id_state = json_values["idCountry"]
         result = get_state.find_states()
-        if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(status=result)
+        if result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(status=result)
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 list_states = []
                 for states_found in result:

@@ -19,7 +19,7 @@ class Country:
             country.id_country = countries["idCountry"]
             results = country
         else:
-            results = ResponsesREST.INVALID_INPUT.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def find_countries(self):
@@ -35,7 +35,7 @@ class Country:
                 countries_list.append(country)
             results = countries_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_country(self):

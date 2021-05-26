@@ -5,6 +5,7 @@ from flask import Blueprint, request, Response
 from src.models.account_role import AccountRole
 from src.models.rating import Rating
 from src.routes.auth import Auth
+from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
 rating = Blueprint("Ratings", __name__)
@@ -15,7 +16,8 @@ rating = Blueprint("Ratings", __name__)
 def add_rating():
     json_values = request.json
     values_required = {"comment", "rating", "idRequest"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         rating_add = Rating()
@@ -27,7 +29,7 @@ def add_rating():
             response = Response(json.dumps(rating_add.json_rating()), status=ResponsesREST.CREATED.value,
                                 mimetype="application/json")
         else:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -37,16 +39,17 @@ def add_rating():
 def find_ratings():
     json_values = request.json
     values_required = {"idService"}
-    response = Response(status=ResponsesREST.INVALID_INPUT.value)
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         # validator
         get_ratings = Rating()
         result = get_ratings.find_ratings(json_values["idService"])
         if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(status=result)
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(status=result)
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 list_ratings = []
                 for ratings_found in result:

@@ -78,7 +78,7 @@ class Service:
             service.maximum_cost = services_founds["maximumCost"]
             results = service
         else:
-            results = ResponsesREST.INVALID_INPUT.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def change_service(self):
@@ -137,7 +137,7 @@ class Service:
                 services_list.append(service)
             results = services_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_service(self):

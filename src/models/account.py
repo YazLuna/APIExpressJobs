@@ -87,7 +87,7 @@ class Account:
             account.memberATE_status = accounts_founds["memberATEStatus"]
             results = account
         else:
-            results = ResponsesREST.INVALID_INPUT.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def consult_list_accounts(self, memberATEStatus, filter_search, criterion):
@@ -119,7 +119,7 @@ class Account:
                 account_list.append(account)
             results = account_list
         else:
-            results = ResponsesREST.INVALID_REQUEST.value
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def update_account(self):
