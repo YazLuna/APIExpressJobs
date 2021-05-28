@@ -7,6 +7,8 @@ from src.models.request import Request
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
+from src.validators.validators import validator_id, validator_find_request, validator_change_status_request, \
+    validator_request
 
 requestService = Blueprint("Requests", __name__)
 
@@ -20,21 +22,21 @@ def add_request():
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        # validator
-        request_add = Request()
-        request_add.address = json_values["address"]
-        request_add.date = json_values["date"]
-        request_add.time = json_values["time"]
-        request_add.trouble = json_values["trouble"]
-        request_add.service_status = json_values["serviceStatus"]
-        request_add.id_memberATE = json_values["idMemberATE"]
-        request_add.id_service = json_values["idService"]
-        result = request_add.add_request()
-        if result == ResponsesREST.CREATED.value:
-            response = Response(json.dumps(request_add.json_request()), status=ResponsesREST.CREATED.value,
-                                mimetype="application/json")
-        else:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        if validator_request.is_valid(json_values):
+            request_add = Request()
+            request_add.address = json_values["address"]
+            request_add.date = json_values["date"]
+            request_add.time = json_values["time"]
+            request_add.trouble = json_values["trouble"]
+            request_add.service_status = json_values["serviceStatus"]
+            request_add.id_memberATE = json_values["idMemberATE"]
+            request_add.id_service = json_values["idService"]
+            result = request_add.add_request()
+            if result == ResponsesREST.CREATED.value:
+                response = Response(json.dumps(request_add.json_request()), status=ResponsesREST.CREATED.value,
+                                    mimetype="application/json")
+            else:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -46,12 +48,14 @@ def change_status_request(requestId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        # validator
-        request_change_status = Request()
-        request_change_status.id_request = requestId
-        request_change_status.request_status = json_values["requestStatus"]
-        result = request_change_status.change_status()
-        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        json_validator = json_values
+        json_validator["idRequest"] = requestId
+        if validator_change_status_request.is_valid(json_validator):
+            request_change_status = Request()
+            request_change_status.id_request = requestId
+            request_change_status.request_status = json_values["requestStatus"]
+            result = request_change_status.change_status()
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -63,37 +67,40 @@ def find_requests():
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        # validator
-        get_request = Request()
-        result = get_request.find_request(json_values["requestStatus"], json_values["filter"],
-                                          json_values["criterion"])
-        if result == ResponsesREST.INVALID_REQUEST.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-        else:
-            if result == ResponsesREST.SERVER_ERROR.value:
+        if validator_find_request.is_valid(json_values):
+            get_request = Request()
+            result = get_request.find_request(json_values["requestStatus"], json_values["filter"],
+                                              json_values["criterion"])
+            if result == ResponsesREST.INVALID_REQUEST.value:
                 response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
-                list_requests = []
-                for request_found in result:
-                    request_found.json_request()
-                    list_requests.append(request_found)
-                response = Response(json.dumps(list_requests), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+                if result == ResponsesREST.SERVER_ERROR.value:
+                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                else:
+                    list_requests = []
+                    for request_found in result:
+                        request_found.json_request()
+                        list_requests.append(request_found)
+                    response = Response(json.dumps(list_requests), status=ResponsesREST.SUCCESSFUL.value,
+                                        mimetype="application/json")
     return response
 
 
 @requestService.route("/requests/<requestId>", methods=["POST"])
 @Auth.requires_token
 def get_request_by_id(requestId):
-    request_get = Request()
-    request_get.id_request = requestId
-    result = request_get.get_request_by_id()
-    if result == ResponsesREST.INVALID_INPUT.value:
-        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-    else:
-        if result == ResponsesREST.SERVER_ERROR.value:
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({"id": requestId}):
+        request_get = Request()
+        request_get.id_request = requestId
+        result = request_get.get_request_by_id()
+        if result == ResponsesREST.INVALID_INPUT.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
-            response = Response(json.dumps(result.json_request()), status=ResponsesREST.SUCCESSFUL.value,
-                                mimetype="application/json")
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+            else:
+                response = Response(json.dumps(result.json_request()), status=ResponsesREST.SUCCESSFUL.value,
+                                    mimetype="application/json")
     return response
