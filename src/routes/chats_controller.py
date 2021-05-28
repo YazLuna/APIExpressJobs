@@ -7,6 +7,7 @@ from src.models.chat import Chat
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
+from src.validators.validators import validator_id_json, validator_chat
 
 chat = Blueprint("Chats", __name__)
 
@@ -20,17 +21,17 @@ def add_chat():
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        # validator
-        chat_add = Chat()
-        chat_add.id_service = json_values["isService"]
-        chat_add.id_memberATE = json_values["idMemberATEClient"]
-        chat_add.id_request = json_values["idRequest"]
-        result = chat_add.add_chat()
-        if result == ResponsesREST.CREATED.value:
-            response = Response(json.dumps(chat_add.json_chat()), status=ResponsesREST.CREATED.value,
-                                mimetype="application/json")
-        else:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        if validator_chat.is_valid(json_values):
+            chat_add = Chat()
+            chat_add.id_service = json_values["isService"]
+            chat_add.id_memberATE = json_values["idMemberATEClient"]
+            chat_add.id_request = json_values["idRequest"]
+            result = chat_add.add_chat()
+            if result == ResponsesREST.CREATED.value:
+                response = Response(json.dumps(chat_add.json_chat()), status=ResponsesREST.CREATED.value,
+                                    mimetype="application/json")
+            else:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
@@ -42,20 +43,20 @@ def get_chats():
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        # validator
-        get_chat = Chat()
-        get_chat.id_memberATE = json_values["idMember"]
-        result = get_chat.find_chats()
-        if result == ResponsesREST.NOT_FOUND.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-        else:
-            if result == ResponsesREST.SERVER_ERROR.value:
+        if validator_id_json.is_valid({"id": json_values["idMember"]}):
+            get_chat = Chat()
+            get_chat.id_memberATE = json_values["idMember"]
+            result = get_chat.find_chats()
+            if result == ResponsesREST.NOT_FOUND.value:
                 response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
-                list_chat = []
-                for chats_found in result:
-                    chats_found.json_chat()
-                    list_chat.append(chats_found)
-                response = Response(json.dumps(list_chat), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+                if result == ResponsesREST.SERVER_ERROR.value:
+                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                else:
+                    list_chat = []
+                    for chats_found in result:
+                        chats_found.json_chat()
+                        list_chat.append(chats_found)
+                    response = Response(json.dumps(list_chat), status=ResponsesREST.SUCCESSFUL.value,
+                                        mimetype="application/json")
     return response

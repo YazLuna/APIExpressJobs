@@ -95,6 +95,7 @@ class Account:
 
     def consult_list_accounts(self, memberATEStatus, filter_search, criterion):
         results = ResponsesREST.SERVER_ERROR.value
+        query = None
         if criterion == "email":
             query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus " \
                     "FROM MemberATE WHERE memberATEStatus = %s AND email = %s "
@@ -103,26 +104,30 @@ class Account:
                 query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus " \
                         "FROM MemberATE WHERE memberATEStatus = %s AND name = %s "
             else:
-                query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus " \
-                        "FROM MemberATE WHERE memberATEStatus = %s AND lastName = %s "
+                if criterion == "lastname":
+                    query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus " \
+                            "FROM MemberATE WHERE memberATEStatus = %s AND lastName = %s "
         param = [memberATEStatus,
                  filter_search]
-        list_account = self.connect.select(query, param)
-        if list_account:
-            account_list = []
-            for accounts in list_account:
-                account = Account()
-                account.id_memberATE = accounts["idMemberATE"]
-                account.email = accounts["email"]
-                account.name = accounts["name"]
-                account.lastName = accounts["lastName"]
-                account.date_birth = accounts["dateBirth"]
-                account.memberATE_status = accounts["memberATEStatus"]
-                account.memberATE_type = accounts["memberATEType"]
-                account_list.append(account)
-            results = account_list
+        if query is not None:
+            list_account = self.connect.select(query, param)
+            if list_account:
+                account_list = []
+                for accounts in list_account:
+                    account = Account()
+                    account.id_memberATE = accounts["idMemberATE"]
+                    account.email = accounts["email"]
+                    account.name = accounts["name"]
+                    account.lastName = accounts["lastName"]
+                    account.date_birth = accounts["dateBirth"]
+                    account.memberATE_status = accounts["memberATEStatus"]
+                    account.memberATE_type = accounts["memberATEType"]
+                    account_list.append(account)
+                results = account_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
         else:
-            results = ResponsesREST.NOT_FOUND.value
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def update_account(self):
@@ -140,7 +145,7 @@ class Account:
                      self.id_memberATE]
             result = self.connect.send_query(query, param)
             if result:
-                results = ResponsesREST.CREATED.value
+                results = ResponsesREST.SUCCESSFUL.value
         else:
             results = ResponsesREST.INVALID_REQUEST.value
         return results
