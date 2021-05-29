@@ -6,7 +6,7 @@ from src.routes.responses_rest import ResponsesREST
 
 def getDate():
     today = date.today()
-    return today.strftime("%Y/%m/%d")
+    return today.strftime("%Y/%m/%d %H:%M:%S")
 
 
 class Message:
@@ -17,6 +17,9 @@ class Message:
         self.memberType = ""
         self.id_chat = ""
         self.connect = Connection.build_from_static()
+
+    def convert_date(self):
+        self.date_time = self.date_time.strftime("%Y/%m/%d %H:%M:%S")
 
     def add_message(self):
         results = ResponsesREST.SERVER_ERROR.value
@@ -63,6 +66,7 @@ class Message:
         return results
 
     def json_message(self):
+        self.convert_date()
         return {"idMessage": self.id_message, "message": self.message,
                 "idChat": self.id_chat, "dateTime": self.date_time,
                 "memberType": self.memberType}

@@ -18,6 +18,9 @@ class Report:
         self.date = getDate()
         self.connect = Connection.build_from_static()
 
+    def convert_date(self):
+        self.date = self.date.strftime('%Y/%m/%d')
+
     def add_report(self):
         results = ResponsesREST.SERVER_ERROR.value
         query = "INSERT INTO Report (idMemberATE, reason, idService, date) VALUES (%s, %s, %s, %s); "
@@ -92,5 +95,6 @@ class Report:
         return results
 
     def json_report(self):
+        self.convert_date()
         return {"idReport": self.id_report, "reason": self.reason,
                 "idService": self.id_service, "idMemberATE": self.id_memberATE}
