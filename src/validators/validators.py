@@ -36,8 +36,8 @@ validator_change_status_request = Schema({
 })
 
 validator_find_accounts = Schema({
-    'memberATEStatus': And(Use(int), lambda s: 0 < s < 4),
-    'filter': And(Use(str), lambda e: 100 > len(e) > 2),
+    'memberATEStatus': And(str, Regex(r'^[0-4]{1}$')),
+    'filterSearch': And(Use(str), lambda e: 100 > len(e) > 2),
     'criterion': And(Use(str), lambda e: 9 > len(e) > 3)
 })
 
@@ -143,8 +143,9 @@ validator_id = Schema({
     'id': And(str, Regex(r'^[0-9]{1,10}$'))
 })
 
-validator_id_json = Schema({
-    'id': And(int)
+validator_find_chats = Schema({
+    'idMember': And(str, Regex(r'^[0-9]{1,10}$')),
+    'memberType': And(str, Regex(r'^[A-Za-z]{6,8}$')),
 })
 
 validator_chat = Schema({
@@ -154,18 +155,18 @@ validator_chat = Schema({
 })
 
 validator_get_reports = Schema({
-    "filter": And(str),
+    "filterSearch": And(str),
     "criterion": And(str)
 })
 
 validator_find_services = Schema({
     "serviceStatus": And(Use(int), lambda t: 0 < t < 4),
-    "filter": And(str),
+    "filterSearch": And(str),
     "criterion": And(str)
 })
 
 validator_find_request = Schema({
     "requestStatus": And(Use(int), lambda t: 0 < t < 6),
-    "filter": And(str),
+    "filterSearch": And(str),
     "criterion": And(str)
 })

@@ -21,5 +21,9 @@ def send_message_to_account():
             account = Account()
             account.email = json_values["email"]
             result = account.send_message(json_values["messageSend"])
-            response = Response(status=result)
+            if result == ResponsesREST.CREATED.value:
+                response = Response(json.dumps({"email": account.email, "messageSend": json_values["messageSend"]}),
+                                    status=result, mimetype="application/json")
+            else:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response

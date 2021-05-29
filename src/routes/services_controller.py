@@ -19,7 +19,7 @@ service = Blueprint("Services", __name__)
 def add_service():
     json_values = request.json
     values_required = {"name", "description", "slogan", "typeService", "workingHours",
-                       "serviceStatus", "minimalCost", "maximumCost", "idCity", "idMemberATE"}
+                       "minimalCost", "maximumCost", "idCity", "idMemberATE"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
@@ -91,34 +91,31 @@ def change_status(idService):
             service_change_status.id_service = idService
             service_change_status.service_status = json_values["serviceStatus"]
             result = service_change_status.change_status()
-            response = Response(status=result)
+            if result == ResponsesREST.SUCCESSFUL.value:
+                response = Response(status=result)
+            else:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
-@service.route("/services", methods=["GET"])
+@service.route("/services/<serviceStatus>/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_token
-def find_services():
-    json_values = request.json
-    values_required = {"serviceStatus", "filter", "criterion"}
+def find_services(serviceStatus, filterSearch, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if all(key in json_values for key in values_required):
-        if validator_find_services.is_valid(json_values):
-            get_services = Service()
-            result = get_services.consult_list_services(json_values["serviceStatus"], json_values["filter"],
-                                                        json_values["criterion"])
-            if result == ResponsesREST.INVALID_REQUEST.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                if result == ResponsesREST.SERVER_ERROR.value:
-                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                else:
-                    list_services = []
-                    for service_found in result:
-                        service_found.json_account()
-                        list_services.append(service_found)
-                    response = Response(json.dumps(list_services), status=ResponsesREST.SUCCESSFUL.value,
-                                        mimetype="application/json")
+    if validator_find_services.is_valid(
+            {"serviceStatus": serviceStatus, "filterSearch": filterSearch, "criterion": criterion}):
+        get_services = Service()
+        result = get_services.consult_list_services(serviceStatus, filterSearch, criterion)
+        if result == ResponsesREST.INVALID_INPUT.value or result == ResponsesREST.SERVER_ERROR.value \
+                or result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_services = []
+            for service_found in result:
+                list_services.append(service_found.json_service())
+            response = Response(json.dumps(list_services), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
 
 
@@ -131,12 +128,9 @@ def get_service_by_id(serviceId):
         service_get = Service()
         service_get.id_service = serviceId
         result = service_get.consult_service()
-        if result == ResponsesREST.INVALID_INPUT.value:
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
-            if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                response = Response(json.dumps(result.json_service()), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+            response = Response(json.dumps(result.json_service()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response

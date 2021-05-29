@@ -11,9 +11,8 @@ class City:
 
     def add_city(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "INSERT INTO City (idCity, name, idState) VALUES (%s, %s, %s); "
-        param = [self.id_city,
-                 self.name,
+        query = "INSERT INTO City (name, idState) VALUES (%s, %s); "
+        param = [self.name,
                  self.id_state]
         result = self.connect.send_query(query, param)
         if result:
@@ -37,9 +36,10 @@ class City:
         cities = self.connect.select(query, param)
         if cities:
             city = City()
-            city.name = cities["name"]
-            city.id_city = cities["idCity"]
-            city.id_state = cities["idState"]
+            city_found = cities[0]
+            city.name = city_found["name"]
+            city.id_city = city_found["idCity"]
+            city.id_state = city_found["idState"]
             results = city
         else:
             results = ResponsesREST.NOT_FOUND.value

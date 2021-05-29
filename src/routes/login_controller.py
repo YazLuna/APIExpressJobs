@@ -25,7 +25,8 @@ def create_token():
             account_login.password = json_values["password"]
             result = account_login.login()
             if result is False:
-                response = Response(json.dumps(json_error(result)), status=request, mimetype="application/json")
+                response = Response(json.dumps(json_error(ResponsesREST.NOT_FOUND.value)), status=request,
+                                    mimetype="application/json")
             else:
                 account_login.memberATE_type = result.memberATE_type
                 account_login.id_memberATE = result.id_memberATE
@@ -34,8 +35,7 @@ def create_token():
                 session["token"] = token
                 response = Response(json.dumps({"token": token, "memberATEType": account_login.memberATE_type,
                                                 "idMemberATE": account_login.id_memberATE}),
-                                    status=ResponsesREST.CREATED.value,
-                                    mimetype="application/json")
+                                    status=ResponsesREST.CREATED.value, mimetype="application/json")
     return response
 
 
@@ -52,7 +52,6 @@ def update_token():
             account_login = Account()
             account_login.username = json_values["username"]
             account_login.password = json_values["password"]
-            account_login.password = json_values["memberATEType"]
             token = Auth.generate_token(account_login)
             session.permanent = True
             session["token"] = token

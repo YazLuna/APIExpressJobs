@@ -17,7 +17,7 @@ account = Blueprint("Accounts", __name__)
 def add_account():
     json_values = request.json
     values_required = {"username", "password", "name", "lastName", "dateBirth",
-                       "email", "idCity", "memberATEStatus", "memberATEType"}
+                       "email", "idCity"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
@@ -30,8 +30,6 @@ def add_account():
             account_add.date_birth = json_values["dateBirth"]
             account_add.email = json_values["email"]
             account_add.id_city = json_values["idCity"]
-            account_add.memberATE_type = json_values["memberATEType"]
-            account_add.memberATE_status = json_values["memberATEStatus"]
             account_add.id_resource = json_values["idResource"]
             result = account_add.add_memberATE()
             if result == ResponsesREST.CREATED.value:
@@ -57,38 +55,32 @@ def change_status_account(idAccount):
             account_status.id_memberATE = idAccount
             account_status.memberATE_status = json_values["memberATEStatus"]
             result = account_status.change_status()
-            response = Response(status=result)
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+            else:
+                response = Response(status=result)
     return response
 
 
-@account.route("/accounts", methods=["GET"])
+@account.route("/accounts/<memberATEStatus>/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_token
 @Auth.requires_role(AccountRole.MANAGER.name)
-def find_accounts():
-    json_values = request.json
-    values_required = {"memberATEStatus", "filter", "criterion"}
+def find_accounts(memberATEStatus, filterSearch, criterion):
+    json_validator = {"memberATEStatus": memberATEStatus, "filterSearch": filterSearch, "criterion": criterion}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if all(key in json_values for key in values_required):
-        if validator_find_accounts.is_valid(json_values):
-            get_accounts = Account()
-            result = get_accounts.consult_list_accounts(json_values["memberATEStatus"], json_values["filter"],
-                                                        json_values["criterion"])
-            if result == ResponsesREST.NOT_FOUND.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                if result == ResponsesREST.SERVER_ERROR.value:
-                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                else:
-                    if result == ResponsesREST.INVALID_INPUT.value:
-                        response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                    else:
-                        list_accounts = []
-                        for account_found in result:
-                            account_found.json_account()
-                            list_accounts.append(account_found)
-                        response = Response(json.dumps(list_accounts), status=ResponsesREST.SUCCESSFUL.value,
-                                            mimetype="application/json")
+    if validator_find_accounts.is_valid(json_validator):
+        get_accounts = Account()
+        result = get_accounts.consult_list_accounts(memberATEStatus, filterSearch, criterion)
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value \
+                or result == ResponsesREST.INVALID_INPUT.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_accounts = []
+            for account_found in result:
+                list_accounts.append(account_found.json_account())
+            response = Response(json.dumps(list_accounts), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
 
 
@@ -98,16 +90,13 @@ def get_account_by_id(accountId):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_id.is_valid({'id': accountId}):
         account_get = Account()
-        account_get.id_account = accountId
+        account_get.id_memberATE = accountId
         result = account_get.consult_account()
-        if result == ResponsesREST.NOT_FOUND.value:
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
-            if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                response = Response(json.dumps(result.json_account()), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+            response = Response(json.dumps(result.json_account()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
 
 
