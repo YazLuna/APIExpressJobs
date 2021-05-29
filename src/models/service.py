@@ -59,13 +59,14 @@ class Service:
 
     def consult_service(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "SELECT idCity, idMemberATE, name, description, slogan, typeService, workingHours, " \
+        query = "SELECT idService, idCity, idMemberATE, name, description, slogan, typeService, workingHours, " \
                 "serviceStatus, minimalCost, maximumCost FROM Service WHERE idService = %s"
         param = [self.id_service]
         list_services = self.connect.select(query, param)
         if list_services:
             service = Service()
             services_founds = list_services[0]
+            service.id_service = services_founds["idService"]
             service.id_city = services_founds["idCity"]
             service.id_memberATE = services_founds["idMemberATE"]
             service.name = services_founds["name"]
@@ -104,6 +105,7 @@ class Service:
 
     def consult_list_services(self, serviceStatus, filter_search, criterion):
         results = ResponsesREST.SERVER_ERROR.value
+        query = None
         if criterion == "typeService":
             query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
                     ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND typeService = %s "
@@ -118,26 +120,28 @@ class Service:
                 else:
                     query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
                             ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND maximumCost = %s "
-        param = [serviceStatus,
-                 filter_search]
-        list_services = self.connect.select(query, param)
-        if list_services:
-            services_list = []
-            for services in list_services:
-                service = Service()
-                service.id_service = services["idService"]
-                service.name = services["name"]
-                service.description = services["description"]
-                service.slogan = services["slogan"]
-                service.type_service = services["typeService"]
-                service.working_hours = services["workingHours"]
-                service.service_status = services["serviceStatus"]
-                service.minimal_cost = services["minimalCost"]
-                service.maximum_cost = services["maximumCost"]
-                services_list.append(service)
-            results = services_list
+        param = [serviceStatus, filter_search]
+        if query is not None:
+            list_services = self.connect.select(query, param)
+            if list_services:
+                services_list = []
+                for services in list_services:
+                    service = Service()
+                    service.id_service = services["idService"]
+                    service.name = services["name"]
+                    service.description = services["description"]
+                    service.slogan = services["slogan"]
+                    service.type_service = services["typeService"]
+                    service.working_hours = services["workingHours"]
+                    service.service_status = services["serviceStatus"]
+                    service.minimal_cost = services["minimalCost"]
+                    service.maximum_cost = services["maximumCost"]
+                    services_list.append(service)
+                results = services_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
         else:
-            results = ResponsesREST.NOT_FOUND.value
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def json_service(self):

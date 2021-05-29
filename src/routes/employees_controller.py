@@ -23,5 +23,8 @@ def add_employee_account(idAccount):
         account_status.id_memberATE = idAccount
         account_status.memberATE_type = AccountRole.CLIENT_EMPLOYEE.value
         result = account_status.add_employee_account()
-        response = Response(status=result)
+        if result == ResponsesREST.SUCCESSFUL.value:
+            response = Response(json.dumps(status=result))
+        else:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response

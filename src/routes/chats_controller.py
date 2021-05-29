@@ -7,7 +7,7 @@ from src.models.chat import Chat
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_id_json, validator_chat
+from src.validators.validators import validator_chat, validator_find_chats
 
 chat = Blueprint("Chats", __name__)
 
@@ -35,28 +35,23 @@ def add_chat():
     return response
 
 
-@chat.route("/chats", methods=["GET"])
+@chat.route("/chats/<idMember>/<memberType>", methods=["GET"])
 @Auth.requires_token
-def get_chats():
-    json_values = request.json
-    values_required = {"idMember"}
+def get_chats(idMember, memberType):
+    json_validator = {"idMember": idMember, "memberType": memberType}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if all(key in json_values for key in values_required):
-        if validator_id_json.is_valid({"id": json_values["idMember"]}):
-            get_chat = Chat()
-            get_chat.id_memberATE = json_values["idMember"]
-            result = get_chat.find_chats()
-            if result == ResponsesREST.NOT_FOUND.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                if result == ResponsesREST.SERVER_ERROR.value:
-                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                else:
-                    list_chat = []
-                    for chats_found in result:
-                        chats_found.json_chat()
-                        list_chat.append(chats_found)
-                    response = Response(json.dumps(list_chat), status=ResponsesREST.SUCCESSFUL.value,
-                                        mimetype="application/json")
+    if validator_find_chats.is_valid(json_validator):
+        get_chat = Chat()
+        get_chat.id_memberATE = idMember
+        result = get_chat.find_chats(memberType)
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value \
+                or result == ResponsesREST.INVALID_INPUT.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_chat = []
+            for chats_found in result:
+                list_chat.append(chats_found.json_chat())
+            response = Response(json.dumps(list_chat), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response

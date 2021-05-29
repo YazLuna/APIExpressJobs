@@ -12,9 +12,10 @@ class Chat:
 
     def add_chat(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "INSERT INTO Chat (idService, idMemberATEClient) VALUES (%s, %s); "
+        query = "INSERT INTO Chat (idService, idMemberATEClient, idRequest) VALUES (%s, %s, %s); "
         param = [self.id_service,
-                 self.id_memberATE]
+                 self.id_memberATE,
+                 self.id_request]
         result = self.connect.send_query(query, param)
         if result:
             self.id_chat = self.get_id()
@@ -39,24 +40,28 @@ class Chat:
                     " ON C.idRequest = R.idRequest WHERE C.idMemberATEClient = %s " \
                     "AND (R.requestStatus = 1 OR R.requestStatus = 2);"
         else:
-            query = "SELECT C.idChat, C.idRequest, C.idMemberATEClient, S.idService FROM Chat C " \
-                    "INNER JOIN Service S ON C.idService = S.idService INNER JOIN Request R" \
-                    " ON C.idRequest = R.idRequest WHERE S.idMemberATE = %s " \
-                    "AND (R.requestStatus = 1 OR R.requestStatus = 2);"
+            if memberType == "employee":
+                query = "SELECT C.idChat, C.idRequest, C.idMemberATEClient, S.idService FROM Chat C " \
+                        "INNER JOIN Service S ON C.idService = S.idService INNER JOIN Request R" \
+                        " ON C.idRequest = R.idRequest WHERE S.idMemberATE = %s " \
+                        "AND (R.requestStatus = 1 OR R.requestStatus = 2);"
         param = [self.id_memberATE]
-        list_chats = self.connect.select(query, param)
-        if list_chats:
-            chat_list = []
-            for chats in list_chats:
-                chat = Chat()
-                chat.id_chat = chats["idChat"]
-                chat.id_request = chats["idRequest"]
-                chat.id_service = chats["idService"]
-                chat.id_memberATE = chats["idMemberATEClient"]
-                chat_list.append(chat)
-            results = chat_list
+        if query is not None:
+            list_chats = self.connect.select(query, param)
+            if list_chats:
+                chat_list = []
+                for chats in list_chats:
+                    chat = Chat()
+                    chat.id_chat = chats["idChat"]
+                    chat.id_request = chats["idRequest"]
+                    chat.id_service = chats["idService"]
+                    chat.id_memberATE = chats["idMemberATEClient"]
+                    chat_list.append(chat)
+                results = chat_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
         else:
-            results = ResponsesREST.NOT_FOUND.value
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def json_chat(self):

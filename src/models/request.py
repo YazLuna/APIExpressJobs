@@ -63,6 +63,7 @@ class Request:
 
     def find_request(self, request_status, filter_search, criterion):
         results = ResponsesREST.SERVER_ERROR.value
+        query = None
         if criterion == "memberATE":
             query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
                     "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
@@ -73,26 +74,28 @@ class Request:
                     "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
                     "Service S on R.idService = S.idService WHERE R.requestStatus = %s " \
                     "AND S.name = %s;"
-        param = [request_status,
-                 filter_search]
-        list_request = self.connect.select(query, param)
-        if list_request:
-            request_list = []
-            for requests in list_request:
-                request = Request()
-                request.id_service = requests["idService"]
-                request.name = requests["name"]
-                request.description = requests["description"]
-                request.slogan = requests["slogan"]
-                request.type_service = requests["typeService"]
-                request.working_hours = requests["workingHours"]
-                request.service_status = requests["serviceStatus"]
-                request.minimal_cost = requests["minimalCost"]
-                request.maximum_cost = requests["maximumCost"]
-                request_list.append(request)
-            results = request_list
+        param = [request_status, filter_search]
+        if query is not None:
+            list_request = self.connect.select(query, param)
+            if list_request:
+                request_list = []
+                for requests in list_request:
+                    request = Request()
+                    request.id_service = requests["idService"]
+                    request.name = requests["name"]
+                    request.description = requests["description"]
+                    request.slogan = requests["slogan"]
+                    request.type_service = requests["typeService"]
+                    request.working_hours = requests["workingHours"]
+                    request.service_status = requests["serviceStatus"]
+                    request.minimal_cost = requests["minimalCost"]
+                    request.maximum_cost = requests["maximumCost"]
+                    request_list.append(request)
+                results = request_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
         else:
-            results = ResponsesREST.NOT_FOUND.value
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def change_status(self):

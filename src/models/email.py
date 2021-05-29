@@ -8,7 +8,7 @@ from src.routes.responses_rest import ResponsesREST
 class Email:
     @staticmethod
     def send_email(email, message_send):
-        result = ResponsesREST.INVALID_REQUEST.value
+        result = ResponsesREST.SERVER_ERROR.value
         msg = MIMEMultipart()
 
         message = message_send

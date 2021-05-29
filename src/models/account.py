@@ -21,6 +21,9 @@ class Account:
         self.memberATE_type = AccountRole.CLIENT.value
         self.connect = Connection.build_from_static()
 
+    def convert_date(self):
+        self.date_birth = self.date_birth.strftime('%Y/%m/%d')
+
     def login(self):
         query = "SELECT memberATEType, idMemberATE FROM MemberATE WHERE username = %s AND password = %s"
         param = [self.username,
@@ -71,13 +74,14 @@ class Account:
 
     def consult_account(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "SELECT email, dateBirth, lastName, name, idCity, idResource, username, password, memberATEType, " \
-                "memberATEStatus FROM MemberATE WHERE idMemberATE = %s"
+        query = "SELECT idMemberATE, email, dateBirth, lastName, name, idCity, idResource, username, password, " \
+                "memberATEType, memberATEStatus FROM MemberATE WHERE idMemberATE = %s"
         param = [self.id_memberATE]
         list_accounts = self.connect.select(query, param)
         if list_accounts:
             account = Account()
             accounts_founds = list_accounts[0]
+            account.id_memberATE = accounts_founds["idMemberATE"]
             account.email = accounts_founds["email"]
             account.name = accounts_founds["name"]
             account.lastName = accounts_founds["lastName"]
@@ -192,6 +196,7 @@ class Account:
         return result
 
     def json_account(self):
+        self.convert_date()
         return {"idMemberATE": self.id_memberATE, "username": self.username, "password": self.password,
                 "name": self.name, "lastName": self.lastName, "dateBirth": self.date_birth,
                 "email": self.email, "idCity": self.id_city, "idResource": self.id_resource,

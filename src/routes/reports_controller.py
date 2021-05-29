@@ -45,39 +45,30 @@ def get_report_by_id(reportId):
         report_get = Report()
         report_get.id_report = reportId
         result = report_get.consult_report()
-        if result == ResponsesREST.NOT_FOUND.value:
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
-            if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                response = Response(json.dumps(result.json_report()), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+            response = Response(json.dumps(result.json_report()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
 
 
-@report.route("/reports", methods=["GET"])
+@report.route("/reports/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_role(AccountRole.MANAGER.name)
 @Auth.requires_token
-def get_reports():
-    json_values = request.json
-    values_required = {"filter", "criterion"}
+def get_reports(filterSearch, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if all(key in json_values for key in values_required):
-        if validator_get_reports.is_valid(json_values):
-            get_report = Report()
-            result = get_report.consult_list_reports(json_values["filter"], json_values["criterion"])
-            if result == ResponsesREST.INVALID_REQUEST.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                if result == ResponsesREST.SERVER_ERROR.value:
-                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                else:
-                    list_reports = []
-                    for reports_found in result:
-                        reports_found.json_report()
-                        list_reports.append(reports_found)
-                    response = Response(json.dumps(list_reports), status=ResponsesREST.SUCCESSFUL.value,
-                                        mimetype="application/json")
+    if validator_get_reports.is_valid({"filterSearch": filterSearch, "criterion": criterion}):
+        get_report = Report()
+        result = get_report.consult_list_reports(filterSearch, criterion)
+        if result == ResponsesREST.INVALID_INPUT.value or result == ResponsesREST.NOT_FOUND.value \
+                or result == ResponsesREST.SERVER_ERROR.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_reports = []
+            for reports_found in result:
+                list_reports.append(reports_found.json_report())
+            response = Response(json.dumps(list_reports), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response

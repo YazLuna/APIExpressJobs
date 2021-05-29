@@ -28,7 +28,6 @@ def add_request():
             request_add.date = json_values["date"]
             request_add.time = json_values["time"]
             request_add.trouble = json_values["trouble"]
-            request_add.service_status = json_values["serviceStatus"]
             request_add.id_memberATE = json_values["idMemberATE"]
             request_add.id_service = json_values["idService"]
             result = request_add.add_request()
@@ -55,34 +54,31 @@ def change_status_request(requestId):
             request_change_status.id_request = requestId
             request_change_status.request_status = json_values["requestStatus"]
             result = request_change_status.change_status()
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+            if result == ResponsesREST.SERVER_ERROR.value:
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+            else:
+                response = Response(status=result)
     return response
 
 
-@requestService.route("/requests", methods=["GET"])
+@requestService.route("/requests/<requestStatus>/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_token
-def find_requests():
-    json_values = request.json
-    values_required = {"requestStatus", "filter", "criterion"}
+def find_requests(requestStatus, filterSearch, criterion):
+    json_validator = {"requestStatus": requestStatus, "filterSearch": filterSearch, "criterion": criterion}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if all(key in json_values for key in values_required):
-        if validator_find_request.is_valid(json_values):
-            get_request = Request()
-            result = get_request.find_request(json_values["requestStatus"], json_values["filter"],
-                                              json_values["criterion"])
-            if result == ResponsesREST.INVALID_REQUEST.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                if result == ResponsesREST.SERVER_ERROR.value:
-                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-                else:
-                    list_requests = []
-                    for request_found in result:
-                        request_found.json_request()
-                        list_requests.append(request_found)
-                    response = Response(json.dumps(list_requests), status=ResponsesREST.SUCCESSFUL.value,
-                                        mimetype="application/json")
+    if validator_find_request.is_valid(json_validator):
+        get_request = Request()
+        result = get_request.find_request(requestStatus, filterSearch, criterion)
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value \
+                or result == ResponsesREST.INVALID_INPUT.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_requests = []
+            for request_found in result:
+                list_requests.append(request_found.json_request())
+            response = Response(json.dumps(list_requests), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
 
 
@@ -95,12 +91,9 @@ def get_request_by_id(requestId):
         request_get = Request()
         request_get.id_request = requestId
         result = request_get.get_request_by_id()
-        if result == ResponsesREST.INVALID_INPUT.value:
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
-            if result == ResponsesREST.SERVER_ERROR.value:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
-            else:
-                response = Response(json.dumps(result.json_request()), status=ResponsesREST.SUCCESSFUL.value,
-                                    mimetype="application/json")
+            response = Response(json.dumps(result.json_request()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
     return response
