@@ -9,6 +9,7 @@ from src.routes.cities_controller import city
 from src.routes.countries_controller import country
 from src.routes.emails_controller import email
 from src.routes.employees_controller import employee
+from src.routes.images_controller import image
 from src.routes.login_controller import login
 from src.routes.messages_controller import message
 from src.routes.ratings_controller import rating
@@ -34,6 +35,7 @@ app.register_blueprint(chat)
 app.register_blueprint(city)
 app.register_blueprint(country)
 app.register_blueprint(state)
+app.register_blueprint(image)
 app.config["SECRET_KEY"] = "gettawi777stb"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=15)
 

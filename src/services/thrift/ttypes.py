@@ -21,6 +21,8 @@ class Resource(object):
      - isMainResource
      - name
      - idService
+     - resourceFile
+     - idMemberATE
     """
 
     thrift_spec = (
@@ -30,14 +32,18 @@ class Resource(object):
         (3, TType.BOOL, 'isMainResource', None, None, ),  # 3
         (4, TType.STRING, 'name', 'UTF8', None, ),  # 4
         (5, TType.I32, 'idService', None, None, ),  # 5
+        (6, TType.STRING, 'resourceFile', 'BINARY', None, ),  # 6
+        (7, TType.I32, 'idMemberATE', None, None, ),  # 7
     )
 
-    def __init__(self, idResource=None, routeSave=None, isMainResource=None, name=None, idService=None,):
+    def __init__(self, idResource=None, routeSave=None, isMainResource=None, name=None, idService=None, resourceFile=None, idMemberATE=None,):
         self.idResource = idResource
         self.routeSave = routeSave
         self.isMainResource = isMainResource
         self.name = name
         self.idService = idService
+        self.resourceFile = resourceFile
+        self.idMemberATE = idMemberATE
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -73,6 +79,16 @@ class Resource(object):
                     self.idService = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.resourceFile = iprot.readBinary()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.idMemberATE = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -102,6 +118,14 @@ class Resource(object):
         if self.idService is not None:
             oprot.writeFieldBegin('idService', TType.I32, 5)
             oprot.writeI32(self.idService)
+            oprot.writeFieldEnd()
+        if self.resourceFile is not None:
+            oprot.writeFieldBegin('resourceFile', TType.STRING, 6)
+            oprot.writeBinary(self.resourceFile)
+            oprot.writeFieldEnd()
+        if self.idMemberATE is not None:
+            oprot.writeFieldBegin('idMemberATE', TType.I32, 7)
+            oprot.writeI32(self.idMemberATE)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

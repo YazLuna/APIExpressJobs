@@ -6,11 +6,13 @@
 #  options string: py
 #
 
+from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
+from thrift.protocol.TProtocol import TProtocolException
+import sys
 import logging
-
-from thrift.Thrift import TProcessor
-
 from .ttypes import *
+from thrift.Thrift import TProcessor
+from thrift.transport import TTransport
 
 
 class Iface(object):
@@ -21,24 +23,24 @@ class Iface(object):
         """
         pass
 
-    def GetResource(self, resource):
+    def GetResource(self, routeSave):
         """
         Parameters:
-         - resource
+         - routeSave
         """
         pass
 
-    def DeleteResource(self, resource):
+    def DeleteResource(self, routeSave):
         """
         Parameters:
-         - resource
+         - routeSave
         """
         pass
 
-    def GetResourcesList(self, idService):
+    def GetResourcesList(self, routes):
         """
         Parameters:
-         - idService
+         - routes
         """
         pass
 
@@ -81,18 +83,18 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "AddResource failed: unknown result")
 
-    def GetResource(self, resource):
+    def GetResource(self, routeSave):
         """
         Parameters:
-         - resource
+         - routeSave
         """
-        self.send_GetResource(resource)
+        self.send_GetResource(routeSave)
         return self.recv_GetResource()
 
-    def send_GetResource(self, resource):
+    def send_GetResource(self, routeSave):
         self._oprot.writeMessageBegin('GetResource', TMessageType.CALL, self._seqid)
         args = GetResource_args()
-        args.resource = resource
+        args.routeSave = routeSave
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -112,18 +114,18 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "GetResource failed: unknown result")
 
-    def DeleteResource(self, resource):
+    def DeleteResource(self, routeSave):
         """
         Parameters:
-         - resource
+         - routeSave
         """
-        self.send_DeleteResource(resource)
+        self.send_DeleteResource(routeSave)
         return self.recv_DeleteResource()
 
-    def send_DeleteResource(self, resource):
+    def send_DeleteResource(self, routeSave):
         self._oprot.writeMessageBegin('DeleteResource', TMessageType.CALL, self._seqid)
         args = DeleteResource_args()
-        args.resource = resource
+        args.routeSave = routeSave
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -143,18 +145,18 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "DeleteResource failed: unknown result")
 
-    def GetResourcesList(self, idService):
+    def GetResourcesList(self, routes):
         """
         Parameters:
-         - idService
+         - routes
         """
-        self.send_GetResourcesList(idService)
+        self.send_GetResourcesList(routes)
         return self.recv_GetResourcesList()
 
-    def send_GetResourcesList(self, idService):
+    def send_GetResourcesList(self, routes):
         self._oprot.writeMessageBegin('GetResourcesList', TMessageType.CALL, self._seqid)
         args = GetResourcesList_args()
-        args.idService = idService
+        args.routes = routes
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -224,7 +226,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = GetResource_result()
         try:
-            result.success = self._handler.GetResource(args.resource)
+            result.success = self._handler.GetResource(args.routeSave)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -243,7 +245,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = DeleteResource_result()
         try:
-            result.success = self._handler.DeleteResource(args.resource)
+            result.success = self._handler.DeleteResource(args.routeSave)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -262,7 +264,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = GetResourcesList_result()
         try:
-            result.success = self._handler.GetResourcesList(args.idService)
+            result.success = self._handler.GetResourcesList(args.routes)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -275,7 +277,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-
 # HELPER FUNCTIONS AND STRUCTURES
 
 
@@ -287,15 +288,14 @@ class AddResource_args(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'resource', (Resource, Resource.thrift_spec), None,),  # 1
+        (1, TType.STRUCT, 'resource', (Resource, Resource.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, resource=None, ):
+    def __init__(self, resource=None,):
         self.resource = resource
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -348,15 +348,14 @@ class AddResource_result(object):
     """
 
     thrift_spec = (
-        (0, TType.I32, 'success', None, None,),  # 0
+        (0, TType.I32, 'success', None, None, ),  # 0
     )
 
-    def __init__(self, success=None, ):
+    def __init__(self, success=None,):
         self.success = success
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -404,20 +403,19 @@ class AddResource_result(object):
 class GetResource_args(object):
     """
     Attributes:
-     - resource
+     - routeSave
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'resource', (Resource, Resource.thrift_spec), None,),  # 1
+        (1, TType.STRING, 'routeSave', 'UTF8', None, ),  # 1
     )
 
-    def __init__(self, resource=None, ):
-        self.resource = resource
+    def __init__(self, routeSave=None,):
+        self.routeSave = routeSave
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -426,9 +424,8 @@ class GetResource_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.resource = Resource()
-                    self.resource.read(iprot)
+                if ftype == TType.STRING:
+                    self.routeSave = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -441,9 +438,9 @@ class GetResource_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('GetResource_args')
-        if self.resource is not None:
-            oprot.writeFieldBegin('resource', TType.STRUCT, 1)
-            self.resource.write(oprot)
+        if self.routeSave is not None:
+            oprot.writeFieldBegin('routeSave', TType.STRING, 1)
+            oprot.writeString(self.routeSave.encode('utf-8') if sys.version_info[0] == 2 else self.routeSave)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -470,15 +467,14 @@ class GetResource_result(object):
     """
 
     thrift_spec = (
-        (0, TType.I32, 'success', None, None,),  # 0
+        (0, TType.STRUCT, 'success', (Resource, Resource.thrift_spec), None, ),  # 0
     )
 
-    def __init__(self, success=None, ):
+    def __init__(self, success=None,):
         self.success = success
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -487,8 +483,9 @@ class GetResource_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.I32:
-                    self.success = iprot.readI32()
+                if ftype == TType.STRUCT:
+                    self.success = Resource()
+                    self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -502,8 +499,8 @@ class GetResource_result(object):
             return
         oprot.writeStructBegin('GetResource_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I32, 0)
-            oprot.writeI32(self.success)
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -526,20 +523,19 @@ class GetResource_result(object):
 class DeleteResource_args(object):
     """
     Attributes:
-     - resource
+     - routeSave
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'resource', (Resource, Resource.thrift_spec), None,),  # 1
+        (1, TType.STRING, 'routeSave', 'UTF8', None, ),  # 1
     )
 
-    def __init__(self, resource=None, ):
-        self.resource = resource
+    def __init__(self, routeSave=None,):
+        self.routeSave = routeSave
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -548,9 +544,8 @@ class DeleteResource_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.resource = Resource()
-                    self.resource.read(iprot)
+                if ftype == TType.STRING:
+                    self.routeSave = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -563,9 +558,9 @@ class DeleteResource_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('DeleteResource_args')
-        if self.resource is not None:
-            oprot.writeFieldBegin('resource', TType.STRUCT, 1)
-            self.resource.write(oprot)
+        if self.routeSave is not None:
+            oprot.writeFieldBegin('routeSave', TType.STRING, 1)
+            oprot.writeString(self.routeSave.encode('utf-8') if sys.version_info[0] == 2 else self.routeSave)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -592,15 +587,14 @@ class DeleteResource_result(object):
     """
 
     thrift_spec = (
-        (0, TType.I32, 'success', None, None,),  # 0
+        (0, TType.I32, 'success', None, None, ),  # 0
     )
 
-    def __init__(self, success=None, ):
+    def __init__(self, success=None,):
         self.success = success
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -648,20 +642,19 @@ class DeleteResource_result(object):
 class GetResourcesList_args(object):
     """
     Attributes:
-     - idService
+     - routes
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'idService', None, None,),  # 1
+        (1, TType.LIST, 'routes', (TType.STRING, 'UTF8', False), None, ),  # 1
     )
 
-    def __init__(self, idService=None, ):
-        self.idService = idService
+    def __init__(self, routes=None,):
+        self.routes = routes
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -670,8 +663,13 @@ class GetResourcesList_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.I32:
-                    self.idService = iprot.readI32()
+                if ftype == TType.LIST:
+                    self.routes = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.routes.append(_elem5)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             else:
@@ -684,9 +682,12 @@ class GetResourcesList_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('GetResourcesList_args')
-        if self.idService is not None:
-            oprot.writeFieldBegin('idService', TType.I32, 1)
-            oprot.writeI32(self.idService)
+        if self.routes is not None:
+            oprot.writeFieldBegin('routes', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.routes))
+            for iter6 in self.routes:
+                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -713,15 +714,14 @@ class GetResourcesList_result(object):
     """
 
     thrift_spec = (
-        (0, TType.I32, 'success', None, None,),  # 0
+        (0, TType.LIST, 'success', (TType.STRUCT, (Resource, Resource.thrift_spec), False), None, ),  # 0
     )
 
-    def __init__(self, success=None, ):
+    def __init__(self, success=None,):
         self.success = success
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
             return
         iprot.readStructBegin()
@@ -730,8 +730,14 @@ class GetResourcesList_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.I32:
-                    self.success = iprot.readI32()
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = Resource()
+                        _elem12.read(iprot)
+                        self.success.append(_elem12)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             else:
@@ -745,8 +751,11 @@ class GetResourcesList_result(object):
             return
         oprot.writeStructBegin('GetResourcesList_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I32, 0)
-            oprot.writeI32(self.success)
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRUCT, len(self.success))
+            for iter13 in self.success:
+                iter13.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
