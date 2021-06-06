@@ -1,7 +1,6 @@
-import io
 import json
 
-from flask import Blueprint, request, Response, send_file
+from flask import Blueprint, request, Response
 
 from src.models.resource import Resource
 from src.routes.exception_responses_json import json_error
@@ -43,7 +42,7 @@ def delete_resource(route):
     resource_delete = Resource()
     resource_delete.route_save = route
     result = resource_delete.delete_resource_server()
-    if result == ResponsesREST.SERVER_ERROR.value:
+    if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.NOT_FOUND.value:
         response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     else:
         response = Response(status=result)
