@@ -1,3 +1,5 @@
+import mysql
+
 from src.connect_database.Connection import Connection
 from src.routes.responses_rest import ResponsesREST
 
@@ -18,6 +20,8 @@ class City:
         if result:
             self.id_city = self.get_id()
             results = ResponsesREST.CREATED.value
+        else:
+            results = ResponsesREST.INVALID_REQUEST.value
         return results
 
     def get_id(self):

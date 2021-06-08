@@ -148,6 +148,11 @@ validator_get_resources = Schema({
     'getResource': 'getResource'
 })
 
+validator_get_states = Schema({
+    'id': And(str, Regex(r'^[0-9]{1,10}$')),
+    'getCountry': 'getCountry'
+})
+
 validator_find_chats = Schema({
     'idMember': And(str, Regex(r'^[0-9]{1,10}$')),
     'memberType': And(str, Regex(r'^[A-Za-z]{6,8}$')),
