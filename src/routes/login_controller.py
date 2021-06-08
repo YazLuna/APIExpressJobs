@@ -25,16 +25,19 @@ def create_token():
             account_login.password = json_values["password"]
             result = account_login.login()
             if result is False:
-                response = Response(json.dumps(json_error(ResponsesREST.NOT_FOUND.value)), status=request,
+                response = Response(json.dumps(json_error(ResponsesREST.NOT_FOUND.value)),
+                                    status=ResponsesREST.NOT_FOUND.value,
                                     mimetype="application/json")
             else:
                 account_login.memberATE_type = result.memberATE_type
                 account_login.id_memberATE = result.id_memberATE
+                account_login.id_city = result.id_city
                 token = Auth.generate_token(account_login)
                 session.permanent = True
                 session["token"] = token
                 response = Response(json.dumps({"token": token, "memberATEType": account_login.memberATE_type,
-                                                "idMemberATE": account_login.id_memberATE}),
+                                                "idMemberATE": account_login.id_memberATE,
+                                                "idCity": account_login.id_city}),
                                     status=ResponsesREST.CREATED.value, mimetype="application/json")
     return response
 
