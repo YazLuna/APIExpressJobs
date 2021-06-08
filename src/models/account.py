@@ -25,7 +25,7 @@ class Account:
         self.date_birth = self.date_birth.strftime('%Y/%m/%d')
 
     def login(self):
-        query = "SELECT memberATEType, idMemberATE FROM MemberATE WHERE username = %s AND password = %s"
+        query = "SELECT memberATEType, idMemberATE, idCity FROM MemberATE WHERE username = %s AND password = %s"
         param = [self.username,
                  self.password]
         list_accounts = self.connect.select(query, param)
@@ -35,6 +35,7 @@ class Account:
             account_found = list_accounts[0]
             account.memberATE_type = account_found["memberATEType"]
             account.id_memberATE = account_found["idMemberATE"]
+            account.id_city = account_found["idCity"]
         return account
 
     def send_message(self, code):
