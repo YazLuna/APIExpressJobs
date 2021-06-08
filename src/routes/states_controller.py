@@ -26,7 +26,7 @@ def get_state_by_id(stateId):
     return response
 
 
-@state.route("/states/<idCountry>", methods=["GET"])
+@state.route("/states/country/<idCountry>", methods=["GET"])
 def get_states(idCountry):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")

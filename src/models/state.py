@@ -16,9 +16,10 @@ class State:
         states = self.connect.select(query, param)
         if states:
             state = State()
-            state.name = states["name"]
-            state.id_country = states["idCountry"]
-            state.id_state = states["idState"]
+            state_found = states[0]
+            state.name = state_found["name"]
+            state.id_country = state_found["idCountry"]
+            state.id_state = state_found["idState"]
             results = state
         else:
             results = ResponsesREST.NOT_FOUND.value

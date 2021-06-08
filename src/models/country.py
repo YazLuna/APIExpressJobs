@@ -15,8 +15,9 @@ class Country:
         countries = self.connect.select(query, param)
         if countries:
             country = Country()
-            country.name = countries["name"]
-            country.id_country = countries["idCountry"]
+            country_found = countries[0]
+            country.name = country_found["name"]
+            country.id_country = country_found["idCountry"]
             results = country
         else:
             results = ResponsesREST.NOT_FOUND.value
