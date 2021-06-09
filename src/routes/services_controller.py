@@ -162,8 +162,8 @@ def find_services_employee(idMemberATE):
 
 
 @service.route("/services/city/<filterSearch>/<criterion>/<idCity>", methods=["GET"])
-#@Auth.requires_token
-#@Auth.requires_role(AccountRole.CLIENT.name)
+@Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
 def find_services_city_filter(filterSearch, criterion, idCity):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
