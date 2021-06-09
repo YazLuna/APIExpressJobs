@@ -8,7 +8,7 @@ from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 from src.validators.validators import validator_id, validator_find_services, validator_change_status_service, \
-    validator_service
+    validator_service, validator_find_services_city
 
 service = Blueprint("Services", __name__)
 
@@ -100,13 +100,78 @@ def change_status(idService):
 
 @service.route("/services/<serviceStatus>/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_token
-def find_services(serviceStatus, filterSearch, criterion):
+@Auth.requires_role(AccountRole.MANAGER.name)
+def find_services_manager(serviceStatus, filterSearch, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_find_services.is_valid(
             {"serviceStatus": serviceStatus, "filterSearch": filterSearch, "criterion": criterion}):
         get_services = Service()
         result = get_services.consult_list_services(serviceStatus, filterSearch, criterion)
+        if result == ResponsesREST.INVALID_INPUT.value or result == ResponsesREST.SERVER_ERROR.value \
+                or result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_services = []
+            for service_found in result:
+                list_services.append(service_found.json_service())
+            response = Response(json.dumps(list_services), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
+
+
+@service.route("/services/city/<idCity>", methods=["GET"])
+@Auth.requires_token
+def find_services_city(idCity):
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({"id": idCity}):
+        get_services = Service()
+        get_services.id_city = idCity
+        result = get_services.get_services_city()
+        if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_services = []
+            for service_found in result:
+                list_services.append(service_found.json_service())
+            response = Response(json.dumps(list_services), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
+
+
+@service.route("/services/employee/<idMemberATE>", methods=["GET"])
+@Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
+def find_services_employee(idMemberATE):
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({"id": idMemberATE}):
+        get_services = Service()
+        get_services.id_memberATE = idMemberATE
+        result = get_services.get_services_employee()
+        if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.NOT_FOUND.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            list_services = []
+            for service_found in result:
+                list_services.append(service_found.json_service())
+            response = Response(json.dumps(list_services), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
+
+
+@service.route("/services/city/<filterSearch>/<criterion>/<idCity>", methods=["GET"])
+@Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
+def find_services_city_filter(filterSearch, criterion, idCity):
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_find_services_city.is_valid(
+            {"filterSearch": filterSearch, "criterion": criterion, "idCity": idCity}):
+        get_services = Service()
+        get_services.id_city = idCity
+        result = get_services.consult_list_services_city(filterSearch, criterion)
         if result == ResponsesREST.INVALID_INPUT.value or result == ResponsesREST.SERVER_ERROR.value \
                 or result == ResponsesREST.NOT_FOUND.value:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")

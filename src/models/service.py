@@ -118,8 +118,9 @@ class Service:
                     query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
                             ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND minimalCost = %s "
                 else:
-                    query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
-                            ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND maximumCost = %s "
+                    if criterion == "maximumCost":
+                        query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
+                                ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND maximumCost = %s "
         param = [serviceStatus, filter_search]
         if query is not None:
             list_services = self.connect.select(query, param)
@@ -142,6 +143,104 @@ class Service:
                 results = ResponsesREST.NOT_FOUND.value
         else:
             results = ResponsesREST.INVALID_INPUT.value
+        return results
+
+    def consult_list_services_city(self, filter_search, criterion):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = None
+        if criterion == "typeService":
+            query = "SELECT idService, name, description, slogan, typeService, workingHours" \
+                    ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                    "AND typeService = %s AND idCity = %s;"
+        else:
+            if criterion == "name":
+                query = "SELECT idService, name, description, slogan, typeService, workingHours" \
+                        ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                        "AND name LIKE %s AND idCity = %s;"
+            else:
+                if criterion == "minimalCost":
+                    query = "SELECT idService, name, description, slogan, typeService, workingHours" \
+                            ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                            "AND minimalCost = %s AND idCity = %s;"
+                else:
+                    if criterion == "maximumCost":
+                        query = "SELECT idService, name, description, slogan, typeService, workingHours" \
+                                ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                                "AND maximumCost = %s AND idCity = %s;"
+        param = [self.service_status, filter_search, self.id_city]
+        if query is not None:
+            list_services = self.connect.select(query, param)
+            if list_services:
+                services_list = []
+                for services in list_services:
+                    service = Service()
+                    service.id_service = services["idService"]
+                    service.name = services["name"]
+                    service.description = services["description"]
+                    service.slogan = services["slogan"]
+                    service.type_service = services["typeService"]
+                    service.working_hours = services["workingHours"]
+                    service.minimal_cost = services["minimalCost"]
+                    service.maximum_cost = services["maximumCost"]
+                    services_list.append(service)
+                results = services_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
+        return results
+
+    def get_services_city(self):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "SELECT idService, name, description, slogan, typeService, workingHours, minimalCost, " \
+                "maximumCost, idMemberATE FROM Service WHERE serviceStatus = %s AND idCity = %s "
+        param = [self.service_status,
+                 self.id_city]
+        list_services = self.connect.select(query, param)
+        if list_services:
+            services_list = []
+            for services in list_services:
+                service = Service()
+                service.id_service = services["idService"]
+                service.name = services["name"]
+                service.description = services["description"]
+                service.slogan = services["slogan"]
+                service.type_service = services["typeService"]
+                service.working_hours = services["workingHours"]
+                service.minimal_cost = services["minimalCost"]
+                service.maximum_cost = services["maximumCost"]
+                service.id_memberATE = services["idMemberATE"]
+                services_list.append(service)
+            results = services_list
+        else:
+            results = ResponsesREST.NOT_FOUND.value
+        return results
+
+    def get_services_employee(self):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "SELECT idService, name, description, slogan, typeService, workingHours, minimalCost, " \
+                "maximumCost, idMemberATE, serviceStatus, idCity FROM Service WHERE idMemberATE = %s "
+        param = [self.id_memberATE]
+        list_services = self.connect.select(query, param)
+        if list_services:
+            services_list = []
+            for services in list_services:
+                service = Service()
+                service.id_service = services["idService"]
+                service.name = services["name"]
+                service.description = services["description"]
+                service.slogan = services["slogan"]
+                service.type_service = services["typeService"]
+                service.working_hours = services["workingHours"]
+                service.minimal_cost = services["minimalCost"]
+                service.maximum_cost = services["maximumCost"]
+                service.id_memberATE = services["idMemberATE"]
+                service.service_status = services["serviceStatus"]
+                service.id_city = services["idCity"]
+                services_list.append(service)
+            results = services_list
+        else:
+            results = ResponsesREST.NOT_FOUND.value
         return results
 
     def json_service(self):
