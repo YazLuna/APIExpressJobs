@@ -1,5 +1,6 @@
 from src.connect_database.Connection import Connection
 from src.connect_file_server.resource_services import ConnectServerResource
+from src.models.resource_type import ResourceType
 from src.routes.responses_rest import ResponsesREST
 from src.services.thrift.ttypes import Resource as ResourceStruct
 
@@ -107,10 +108,32 @@ class Resource:
                 resource.id_resource = resource_found["idResource"]
                 resource.is_main_resource = resource_found["isMainResource"]
                 resource.route_save = resource_found["routeSave"]
+                resource.name = resource_found["name"]
                 resource.id_memberATE = resource_found["idMemberATE"]
                 resource.id_service = resource_found["idService"]
                 resource_list.append(resource)
             results = resource_list
+        else:
+            results = ResponsesREST.NOT_FOUND.value
+        return results
+
+    def get_main_resource(self):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
+                " FROM Resource WHERE idService = %s AND isMainResource = %s;"
+        self.is_main_resource = ResourceType.MAIN_RESOURCE.value
+        param = [self.id_service, self.is_main_resource]
+        list_resource = self.connect.select(query, param)
+        if list_resource:
+            resource_list = list_resource[0]
+            resource = Resource()
+            resource.id_resource = resource_list["idResource"]
+            resource.is_main_resource = resource_list["isMainResource"]
+            resource.route_save = resource_list["routeSave"]
+            resource.name = resource_list["name"]
+            resource.id_memberATE = resource_list["idMemberATE"]
+            resource.id_service = resource_list["idService"]
+            results = resource
         else:
             results = ResponsesREST.NOT_FOUND.value
         return results

@@ -70,6 +70,22 @@ def find_resources(serviceId):
     return response
 
 
+@resource.route("/resources/serviceMain/<serviceId>", methods=["GET"])
+def find_resources_main(serviceId):
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({'id': serviceId}):
+        get_resources_service = Resource()
+        get_resources_service.id_service = serviceId
+        result = get_resources_service.get_main_resource()
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            response = Response(json.dumps(result.json_resource()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
+
+
 @resource.route("/resources/<resourceId>", methods=["GET"])
 def get_resource_by_id(resourceId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
