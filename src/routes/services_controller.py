@@ -14,8 +14,8 @@ service = Blueprint("Services", __name__)
 
 
 @service.route("/services", methods=["POST"])
-@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 @Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 def add_service():
     json_values = request.json
     values_required = {"name", "description", "slogan", "typeService", "workingHours",
@@ -44,8 +44,8 @@ def add_service():
 
 
 @service.route("/services/<serviceId>", methods=["PUT"])
-@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 @Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 def change_service(serviceId):
     json_values = request.json
     values_required = {"name", "description", "slogan", "typeService", "workingHours",
@@ -54,10 +54,10 @@ def change_service(serviceId):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         json_validator = json_values
-        json_validator["idService"] = serviceId
+        json_validator["idService"] = int(serviceId)
         if validator_service.is_valid(json_validator):
             service_change = Service()
-            service_change.id_service = serviceId
+            service_change.id_service = int(serviceId)
             service_change.name = json_values["name"]
             service_change.description = json_values["description"]
             service_change.slogan = json_values["slogan"]
@@ -66,13 +66,13 @@ def change_service(serviceId):
             service_change.minimal_cost = json_values["minimalCost"]
             service_change.maximum_cost = json_values["maximumCost"]
             service_change.id_city = json_values["idCity"]
-            service_change.id_memberATE = json_values["idMemberATE"]
+            service_change.id_memberATE = int(json_values["idMemberATE"])
             result = service_change.change_service()
             if result == ResponsesREST.SUCCESSFUL.value:
                 response = Response(json.dumps(service_change.json_service()), status=ResponsesREST.SUCCESSFUL.value,
                                     mimetype="application/json")
             else:
-                response = Response(json.dumps(result), status=result, mimetype="application/json")
+                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 

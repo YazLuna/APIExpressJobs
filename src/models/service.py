@@ -5,9 +5,9 @@ from src.routes.responses_rest import ResponsesREST
 
 class Service:
     def __init__(self):
-        self.id_service = ""
-        self.id_city = ""
-        self.id_memberATE = ""
+        self.id_service = 0
+        self.id_city = 0
+        self.id_memberATE = 0
         self.name = ""
         self.description = ""
         self.slogan = ""
@@ -15,7 +15,7 @@ class Service:
         self.working_hours = ""
         self.service_status = ServiceStatus.ACTIVE.value
         self.minimal_cost = 0
-        self.maximum_cost = ""
+        self.maximum_cost = 0
         self.connect = Connection.build_from_static()
 
     def add_service(self):
@@ -49,12 +49,15 @@ class Service:
 
     def change_status(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "UPDATE Service SET serviceStatus = %s WHERE idService = %s "
-        param = [self.service_status,
-                 self.id_service]
-        result = self.connect.send_query(query, param)
-        if result:
-            results = ResponsesREST.SUCCESSFUL.value
+        if self.service_exist():
+            query = "UPDATE Service SET serviceStatus = %s WHERE idService = %s "
+            param = [self.service_status,
+                     self.id_service]
+            result = self.connect.send_query(query, param)
+            if result:
+                results = ResponsesREST.SUCCESSFUL.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def consult_service(self):
@@ -84,43 +87,69 @@ class Service:
 
     def change_service(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "UPDATE Service SET idCity = %s, name = %s, description = %s," \
-                " slogan = %s, typeService = %s, workingHours = %s," \
-                " minimalCost = %s, maximumCost = %s " \
-                "WHERE idService = %s AND idMemberATE = %s; "
-        param = [self.id_city,
-                 self.name,
-                 self.description,
-                 self.slogan,
-                 self.type_service,
-                 self.working_hours,
-                 self.minimal_cost,
-                 self.maximum_cost,
-                 self.id_service,
-                 self.id_memberATE]
-        result = self.connect.send_query(query, param)
-        if result:
-            results = ResponsesREST.SUCCESSFUL.value
+        if self.service_member_exist():
+            query = "UPDATE Service SET idCity = %s, name = %s, description = %s," \
+                    " slogan = %s, typeService = %s, workingHours = %s," \
+                    " minimalCost = %s, maximumCost = %s " \
+                    "WHERE idService = %s AND idMemberATE = %s; "
+            param = [self.id_city,
+                     self.name,
+                     self.description,
+                     self.slogan,
+                     self.type_service,
+                     self.working_hours,
+                     self.minimal_cost,
+                     self.maximum_cost,
+                     self.id_service,
+                     self.id_memberATE]
+            result = self.connect.send_query(query, param)
+            if result:
+                results = ResponsesREST.SUCCESSFUL.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
+
+    def service_exist(self):
+        result = False
+        query = "SELECT idService FROM Service WHERE idService = %s;"
+        param = [self.id_service]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
+
+    def service_member_exist(self):
+        result = False
+        query = "SELECT idService FROM Service WHERE idService = %s AND idMemberATE = %s;"
+        param = [self.id_service,
+                 self.id_memberATE]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
 
     def consult_list_services(self, serviceStatus, filter_search, criterion):
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "typeService":
             query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
-                    ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND typeService = %s "
+                    ", minimalCost, maximumCost, idCity, idMemberATE FROM Service WHERE serviceStatus = %s " \
+                    "AND typeService = %s "
         else:
             if criterion == "name":
                 query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
-                        ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND name = %s "
+                        ", minimalCost, maximumCost, idCity, idMemberATE FROM Service WHERE serviceStatus = %s " \
+                        "AND name = %s "
             else:
                 if criterion == "minimalCost":
                     query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
-                            ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND minimalCost = %s "
+                            ", minimalCost, maximumCost, idCity, idMemberATE FROM Service WHERE serviceStatus = %s " \
+                            "AND minimalCost = %s "
                 else:
                     if criterion == "maximumCost":
                         query = "SELECT idService, name, description, slogan, typeService, workingHours, serviceStatus" \
-                                ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s AND maximumCost = %s "
+                                ", minimalCost, maximumCost, idCity, idMemberATE FROM Service WHERE serviceStatus = %s " \
+                                "AND maximumCost = %s "
         param = [serviceStatus, filter_search]
         if query is not None:
             list_services = self.connect.select(query, param)
@@ -137,6 +166,8 @@ class Service:
                     service.service_status = services["serviceStatus"]
                     service.minimal_cost = services["minimalCost"]
                     service.maximum_cost = services["maximumCost"]
+                    service.id_city = services["idCity"]
+                    service.id_memberATE = services["idMemberATE"]
                     services_list.append(service)
                 results = services_list
             else:
@@ -150,22 +181,22 @@ class Service:
         query = None
         if criterion == "typeService":
             query = "SELECT idService, name, description, slogan, typeService, workingHours" \
-                    ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                    ", minimalCost, maximumCost, idMemberATE, idCity FROM Service WHERE serviceStatus = %s " \
                     "AND typeService = %s AND idCity = %s;"
         else:
             if criterion == "name":
                 query = "SELECT idService, name, description, slogan, typeService, workingHours" \
-                        ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                        ", minimalCost, maximumCost, idMemberATE, idCity FROM Service WHERE serviceStatus = %s " \
                         "AND name LIKE %s AND idCity = %s;"
             else:
                 if criterion == "minimalCost":
                     query = "SELECT idService, name, description, slogan, typeService, workingHours" \
-                            ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                            ", minimalCost, maximumCost, idMemberATE, idCity FROM Service WHERE serviceStatus = %s " \
                             "AND minimalCost = %s AND idCity = %s;"
                 else:
                     if criterion == "maximumCost":
                         query = "SELECT idService, name, description, slogan, typeService, workingHours" \
-                                ", minimalCost, maximumCost FROM Service WHERE serviceStatus = %s " \
+                                ", minimalCost, maximumCost, idMemberATE, idCity FROM Service WHERE serviceStatus = %s " \
                                 "AND maximumCost = %s AND idCity = %s;"
         param = [self.service_status, filter_search, self.id_city]
         if query is not None:
@@ -182,6 +213,8 @@ class Service:
                     service.working_hours = services["workingHours"]
                     service.minimal_cost = services["minimalCost"]
                     service.maximum_cost = services["maximumCost"]
+                    service.id_city = services["idCity"]
+                    service.id_memberATE = services["idMemberATE"]
                     services_list.append(service)
                 results = services_list
             else:
@@ -193,7 +226,7 @@ class Service:
     def get_services_city(self):
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idService, name, description, slogan, typeService, workingHours, minimalCost, " \
-                "maximumCost, idMemberATE FROM Service WHERE serviceStatus = %s AND idCity = %s "
+                "maximumCost, idMemberATE, idCity FROM Service WHERE serviceStatus = %s AND idCity = %s "
         param = [self.service_status,
                  self.id_city]
         list_services = self.connect.select(query, param)
@@ -210,6 +243,7 @@ class Service:
                 service.minimal_cost = services["minimalCost"]
                 service.maximum_cost = services["maximumCost"]
                 service.id_memberATE = services["idMemberATE"]
+                service.id_city = services["idCity"]
                 services_list.append(service)
             results = services_list
         else:

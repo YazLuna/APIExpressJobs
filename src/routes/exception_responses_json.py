@@ -15,7 +15,7 @@ def json_not_authorized():
 def json_error(code_result):
     result = {"error": "Los datos que ingresó son inválidos, por favor ingrese datos correctos"}
     if code_result == ResponsesREST.SERVER_ERROR.value:
-        result = {"error": "Problema de conexión con la base de datos, intente mas tarde"}
+        result = {"error": "Problema de conexión con la base de datos, ingrese datos correctos"}
     else:
         if code_result == ResponsesREST.INVALID_REQUEST:
             result = {"error": "Solicitud inválida, ya hay un objeto de este tipo registrado"}
