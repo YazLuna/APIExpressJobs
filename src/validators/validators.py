@@ -1,9 +1,8 @@
 from schema import Schema, And, Use, Optional, Regex
 
 validator_memberATE = Schema({
-    Optional('idAccount'): And(str, Regex(r'^[0-9]{1,10}$')),
-    Optional('idResource'): And(int),
-    'username': And(str, Regex(r'^[A-Za-z0-9]{8,20}$')),
+    Optional('idAccount'): And(int),
+    'username': And(str, Regex(r'^[A-Za-z0-9]{3,20}$')),
     'password': And(Use(str), lambda e: 254 > len(e) > 5),
     'name': And(str, Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
     'lastName': And(str,
@@ -54,14 +53,14 @@ validator_city = Schema({
 })
 
 validator_country = Schema({
-    Optional('id_country'): And(int),
+    Optional('idCountry'): And(int),
     'name': And(Use(str),
                 Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{5,50}'),
                 lambda e: 51 > len(e) > 4)
 })
 
 validator_state = Schema({
-    Optional('id_state'): And(int),
+    Optional('idState'): And(int),
     'name': And(Use(str),
                 Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{5,50}'),
                 lambda e: 51 > len(e) > 4)
@@ -119,16 +118,12 @@ validator_service = Schema({
     'workingHours': And(Use(str), Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9]*){2,}'),
                         lambda e: 151 > len(e) > 1),
     'minimalCost': And(float),
-    'maximumCost': And(Use(float), lambda n: n > 0)
+    'maximumCost': And(Use(float), lambda n: n > 0),
+    Optional('serviceStatus'): And(Use(int), lambda n: 4 > n > 0)
 })
 
 validator_id = Schema({
     'id': And(str, Regex(r'^[0-9]{1,10}$'))
-})
-
-validator_get_resources = Schema({
-    'id': And(str, Regex(r'^[0-9]{1,10}$')),
-    'getResource': 'getResource'
 })
 
 validator_find_chats = Schema({

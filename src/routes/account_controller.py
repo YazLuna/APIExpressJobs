@@ -30,7 +30,6 @@ def add_account():
             account_add.date_birth = json_values["dateBirth"]
             account_add.email = json_values["email"]
             account_add.id_city = json_values["idCity"]
-            account_add.id_resource = json_values["idResource"]
             result = account_add.add_memberATE()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(account_add.json_account()), status=ResponsesREST.CREATED.value,

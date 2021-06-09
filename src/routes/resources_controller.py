@@ -5,7 +5,7 @@ from flask import Blueprint, request, Response
 from src.models.resource import Resource
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_id, validator_get_resources, validator_resource
+from src.validators.validators import validator_id, validator_resource
 
 resource = Blueprint("Resources", __name__)
 
@@ -51,11 +51,11 @@ def delete_resource(route):
     return response
 
 
-@resource.route("/resources/<getResource>/<serviceId>", methods=["GET"])
-def find_resources(getResource, serviceId):
+@resource.route("/resources/service/<serviceId>", methods=["GET"])
+def find_resources(serviceId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_get_resources.is_valid({'id': serviceId, 'getResource': getResource}):
+    if validator_id.is_valid({'id': serviceId}):
         get_resources_service = Resource()
         get_resources_service.id_service = serviceId
         result = get_resources_service.get_resource_list()

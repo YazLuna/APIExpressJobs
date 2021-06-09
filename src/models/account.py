@@ -16,7 +16,6 @@ class Account:
         self.username = ""
         self.password = ""
         self.id_city = ""
-        self.id_resource = None
         self.memberATE_status = AccountStatus.ACTIVE.value
         self.memberATE_type = AccountRole.CLIENT.value
         self.connect = Connection.build_from_static()
@@ -44,14 +43,13 @@ class Account:
     def add_memberATE(self):
         results = ResponsesREST.SERVER_ERROR.value
         if self.not_exist_account():
-            query = "INSERT INTO MemberATE (email, dateBirth, lastName, name, idCity, idResource, username," \
-                    " password, memberATEStatus, memberATEType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); "
+            query = "INSERT INTO MemberATE (email, dateBirth, lastName, name, idCity, username," \
+                    " password, memberATEStatus, memberATEType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s); "
             param = [self.email,
                      self.date_birth,
                      self.lastName,
                      self.name,
                      self.id_city,
-                     self.id_resource,
                      self.username,
                      self.password,
                      self.memberATE_status,
@@ -75,7 +73,7 @@ class Account:
 
     def consult_account(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "SELECT idMemberATE, email, dateBirth, lastName, name, idCity, idResource, username, password, " \
+        query = "SELECT idMemberATE, email, dateBirth, lastName, name, idCity, username, password, " \
                 "memberATEType, memberATEStatus FROM MemberATE WHERE idMemberATE = %s"
         param = [self.id_memberATE]
         list_accounts = self.connect.select(query, param)
@@ -90,7 +88,6 @@ class Account:
             account.password = accounts_founds["password"]
             account.username = accounts_founds["username"]
             account.id_city = accounts_founds["idCity"]
-            account.id_resource = accounts_founds["idResource"]
             account.memberATE_type = accounts_founds["memberATEType"]
             account.memberATE_status = accounts_founds["memberATEStatus"]
             results = account
@@ -200,5 +197,5 @@ class Account:
         self.convert_date()
         return {"idMemberATE": self.id_memberATE, "username": self.username, "password": self.password,
                 "name": self.name, "lastName": self.lastName, "dateBirth": self.date_birth,
-                "email": self.email, "idCity": self.id_city, "idResource": self.id_resource,
-                "memberATEType": self.memberATE_type, "memberATEStatus": self.memberATE_status}
+                "email": self.email, "idCity": self.id_city, "memberATEType": self.memberATE_type,
+                "memberATEStatus": self.memberATE_status}
