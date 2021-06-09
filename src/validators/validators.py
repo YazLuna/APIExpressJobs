@@ -153,6 +153,12 @@ validator_find_services = Schema({
     "criterion": And(str)
 })
 
+validator_find_services_city = Schema({
+    "filterSearch": And(str),
+    "criterion": And(str),
+    'idCity': And(str, Regex(r'^[0-9]{1,10}$'))
+})
+
 validator_find_request = Schema({
     "requestStatus": And(Use(int), lambda t: 0 < t < 6),
     "filterSearch": And(str),
