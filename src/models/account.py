@@ -20,9 +20,6 @@ class Account:
         self.memberATE_type = AccountRole.CLIENT.value
         self.connect = Connection.build_from_static()
 
-    def convert_date(self):
-        self.date_birth = self.date_birth.strftime('%Y/%m/%d')
-
     def login(self):
         query = "SELECT memberATEType, idMemberATE, idCity FROM MemberATE WHERE username = %s AND password = %s"
         param = [self.username,
@@ -85,6 +82,7 @@ class Account:
             account.name = accounts_founds["name"]
             account.lastName = accounts_founds["lastName"]
             account.date_birth = accounts_founds["dateBirth"]
+            account.date_birth = account.date_birth.strftime('%Y/%m/%d')
             account.password = accounts_founds["password"]
             account.username = accounts_founds["username"]
             account.id_city = accounts_founds["idCity"]
@@ -122,6 +120,7 @@ class Account:
                     account.name = accounts["name"]
                     account.lastName = accounts["lastName"]
                     account.date_birth = accounts["dateBirth"]
+                    account.date_birth = account.date_birth.strftime('%Y/%m/%d')
                     account.memberATE_status = accounts["memberATEStatus"]
                     account.memberATE_type = accounts["memberATEType"]
                     account_list.append(account)
@@ -194,7 +193,6 @@ class Account:
         return result
 
     def json_account(self):
-        self.convert_date()
         return {"idMemberATE": self.id_memberATE, "username": self.username, "password": self.password,
                 "name": self.name, "lastName": self.lastName, "dateBirth": self.date_birth,
                 "email": self.email, "idCity": self.id_city, "memberATEType": self.memberATE_type,
