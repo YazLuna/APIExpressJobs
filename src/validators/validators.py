@@ -67,13 +67,6 @@ validator_state = Schema({
                 lambda e: 51 > len(e) > 4)
 })
 
-validator_cost = Schema({
-    Optional('id_cost'): And(int),
-    'cost': And(Use(float), lambda co: co < 1000),
-    'currency': And(Use(str), lambda cu: cu in ('MXN')),
-    'id_service': And(int)
-})
-
 validator_message = Schema({
     Optional('idMessage'): And(int),
     'message': And(Use(str), Regex(
@@ -111,16 +104,6 @@ validator_request = Schema({
     'idService': And(int)
 })
 
-validator_resource = Schema({
-    Optional('id_resource'): And(int),
-    'is_main_resource': And(Use(int), lambda m: 0 <= m < 2),
-    'route_rave': And(Use(str), Regex(r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$'),
-                      lambda e: 301 > len(e) > 3),
-    'name': And(Use(str), Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9.]*){2,}'),
-                lambda e: 151 > len(e) > 1),
-    'id_service': And(int)
-})
-
 validator_service = Schema({
     Optional('idService'): And(int),
     'idCity': And(int),
@@ -146,11 +129,6 @@ validator_id = Schema({
 validator_get_resources = Schema({
     'id': And(str, Regex(r'^[0-9]{1,10}$')),
     'getResource': 'getResource'
-})
-
-validator_get_states = Schema({
-    'id': And(str, Regex(r'^[0-9]{1,10}$')),
-    'getCountry': 'getCountry'
 })
 
 validator_find_chats = Schema({
@@ -179,4 +157,12 @@ validator_find_request = Schema({
     "requestStatus": And(Use(int), lambda t: 0 < t < 6),
     "filterSearch": And(str),
     "criterion": And(str)
+})
+
+validator_resource = Schema({
+    'isMainResource': And(Use(int), lambda t: 0 <= t <= 1),
+    'name': And(Use(str), Regex(r'^[A-Za-z0-9]{4,150}$'),
+                lambda e: 150 > len(e) > 3),
+    'idService': And(int),
+    'idMemberATE': And(int)
 })

@@ -5,7 +5,7 @@ from flask import Blueprint, request, Response
 from src.models.resource import Resource
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_id, validator_get_resources
+from src.validators.validators import validator_id, validator_get_resources, validator_resource
 
 resource = Blueprint("Resources", __name__)
 
@@ -17,21 +17,23 @@ def add_resource():
     response = response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                                    status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in resource_save for key in values_required):
-        # Validator
-        resource_add = request.files.getlist("resourceFile")
-        if resource_add:
-            resource_server = Resource()
-            resource_server.is_main_resource = resource_save["isMainResource"]
-            resource_server.name = resource_save["name"]
-            resource_server.id_service = int(resource_save["idService"])
-            resource_server.id_memberATE = int(resource_save["idMemberATE"])
-            resource_server.resource_file = resource_add[0]
-            result = resource_server.add_resource_server()
-            if result == ResponsesREST.CREATED.value:
-                response = Response(json.dumps(resource_server.json_resource()), status=ResponsesREST.CREATED.value,
-                                    mimetype="application/json")
-            else:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        validator = {"isMainResource": resource_save["isMainResource"], "name": resource_save["name"],
+                     "idService": int(resource_save["idService"]), "idMemberATE": int(resource_save["idMemberATE"])}
+        if validator_resource.is_valid(validator):
+            resource_add = request.files.getlist("resourceFile")
+            if resource_add:
+                resource_server = Resource()
+                resource_server.is_main_resource = resource_save["isMainResource"]
+                resource_server.name = resource_save["name"]
+                resource_server.id_service = int(resource_save["idService"])
+                resource_server.id_memberATE = int(resource_save["idMemberATE"])
+                resource_server.resource_file = resource_add[0]
+                result = resource_server.add_resource_server()
+                if result == ResponsesREST.CREATED.value:
+                    response = Response(json.dumps(resource_server.json_resource()), status=ResponsesREST.CREATED.value,
+                                        mimetype="application/json")
+                else:
+                    response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
 
 
