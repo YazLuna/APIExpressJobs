@@ -165,5 +165,6 @@ validator_resource = Schema({
     'name': And(Use(str), Regex(r'^[A-Za-z0-9]{4,150}$'),
                 lambda e: 150 > len(e) > 3),
     'idService': And(int),
-    'idMemberATE': And(int)
+    'idMemberATE': And(int),
+    'ext': And(Use(str), Regex(r'^(?:jpg|jpeg|png)'))
 })

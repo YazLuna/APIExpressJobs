@@ -3,6 +3,7 @@ import json
 from flask import Blueprint, request, Response
 
 from src.models.resource import Resource
+from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 from src.validators.validators import validator_id, validator_resource
@@ -17,10 +18,11 @@ def add_resource():
     response = response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                                    status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in resource_save for key in values_required):
+        resource_add = request.files.getlist("resourceFile")
         validator = {"isMainResource": resource_save["isMainResource"], "name": resource_save["name"],
-                     "idService": int(resource_save["idService"]), "idMemberATE": int(resource_save["idMemberATE"])}
+                     "idService": int(resource_save["idService"]), "idMemberATE": int(resource_save["idMemberATE"]),
+                     "ext": resource_add[0].filename.split(".")[-1]}
         if validator_resource.is_valid(validator):
-            resource_add = request.files.getlist("resourceFile")
             if resource_add:
                 resource_server = Resource()
                 resource_server.is_main_resource = resource_save["isMainResource"]
@@ -38,6 +40,7 @@ def add_resource():
 
 
 @resource.route("/resources/<route>", methods=["DELETE"])
+@Auth.requires_token
 def delete_resource(route):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -52,6 +55,7 @@ def delete_resource(route):
 
 
 @resource.route("/resources/service/<serviceId>", methods=["GET"])
+@Auth.requires_token
 def find_resources(serviceId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -71,6 +75,7 @@ def find_resources(serviceId):
 
 
 @resource.route("/resources/serviceMain/<serviceId>", methods=["GET"])
+@Auth.requires_token
 def find_resources_main(serviceId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -87,6 +92,7 @@ def find_resources_main(serviceId):
 
 
 @resource.route("/resources/<resourceId>", methods=["GET"])
+@Auth.requires_token
 def get_resource_by_id(resourceId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
