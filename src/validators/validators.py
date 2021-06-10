@@ -95,7 +95,7 @@ validator_request = Schema({
     Optional('idRequest'): And(int),
     'address': And(Use(str), Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9#]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9#]*){2,}'),
                    lambda e: 255 > len(e) > 9),
-    'date': And(str, Regex(r'^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\d\d)$')),
+    'date': And(str, Regex(r'^((19|20)\d\d)/(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])$')),
     'time': And(str, Regex(r'^([0-1][1-9]|[2][0-3])(:)([0-5][0-9])(:)([0-5][0-9])$')),
     'trouble': And(Use(str), Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9]*){2,}'),
                    lambda e: 200 > len(e) > 7),
