@@ -4,22 +4,25 @@ from src.routes.responses_rest import ResponsesREST
 
 class Chat:
     def __init__(self):
-        self.id_chat = ""
-        self.id_service = ""
-        self.id_memberATE = ""
-        self.id_request = ""
+        self.id_chat = 0
+        self.id_service = 0
+        self.id_memberATE = 0
+        self.id_request = 0
         self.connect = Connection.build_from_static()
 
     def add_chat(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "INSERT INTO Chat (idService, idMemberATEClient, idRequest) VALUES (%s, %s, %s); "
-        param = [self.id_service,
-                 self.id_memberATE,
-                 self.id_request]
-        result = self.connect.send_query(query, param)
-        if result:
-            self.id_chat = self.get_id()
-            results = ResponsesREST.CREATED.value
+        if self.request_exists():
+            query = "INSERT INTO Chat (idService, idMemberATEClient, idRequest) VALUES (%s, %s, %s); "
+            param = [self.id_service,
+                     self.id_memberATE,
+                     self.id_request]
+            result = self.connect.send_query(query, param)
+            if result:
+                self.id_chat = self.get_id()
+                results = ResponsesREST.CREATED.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def get_id(self):
@@ -30,6 +33,18 @@ class Chat:
             id_list = response[0]
             chat.id_chat = id_list["idChat"]
         return chat.id_chat
+
+    def request_exists(self):
+        result = False
+        query = "SELECT idRequest FROM Request WHERE idRequest = %s AND idMember = %s " \
+                "AND idService = %s;"
+        param = [self.id_request,
+                 self.id_memberATE,
+                 self.id_service]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
 
     def find_chats(self, memberType):
         results = ResponsesREST.SERVER_ERROR.value

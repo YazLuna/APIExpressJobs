@@ -1,21 +1,21 @@
-from datetime import date
+from datetime import datetime
 
 from src.connect_database.Connection import Connection
 from src.routes.responses_rest import ResponsesREST
 
 
 def getDate():
-    today = date.today()
+    today = datetime.now()
     return today.strftime("%Y/%m/%d %H:%M:%S")
 
 
 class Message:
     def __init__(self):
-        self.id_message = ""
+        self.id_message = 0
         self.message = ""
         self.date_time = getDate()
-        self.memberType = ""
-        self.id_chat = ""
+        self.memberType = 0
+        self.id_chat = 0
         self.connect = Connection.build_from_static()
 
     def convert_date(self):
@@ -58,6 +58,7 @@ class Message:
                 message.message = messages["message"]
                 message.id_chat = messages["idChat"]
                 message.date_time = messages["dateTime"]
+                message.date_time = message.date_time.strftime('%Y/%m/%d')
                 message.memberType = messages["memberType"]
                 message_list.append(message)
             results = message_list
@@ -66,7 +67,6 @@ class Message:
         return results
 
     def json_message(self):
-        self.convert_date()
         return {"idMessage": self.id_message, "message": self.message,
                 "idChat": self.id_chat, "dateTime": self.date_time,
                 "memberType": self.memberType}
