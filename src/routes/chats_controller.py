@@ -23,7 +23,7 @@ def add_chat():
     if all(key in json_values for key in values_required):
         if validator_chat.is_valid(json_values):
             chat_add = Chat()
-            chat_add.id_service = json_values["isService"]
+            chat_add.id_service = json_values["idService"]
             chat_add.id_memberATE = json_values["idMemberATEClient"]
             chat_add.id_request = json_values["idRequest"]
             result = chat_add.add_chat()
