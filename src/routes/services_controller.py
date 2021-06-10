@@ -100,7 +100,6 @@ def change_status(idService):
 
 @service.route("/services/<serviceStatus>/<filterSearch>/<criterion>", methods=["GET"])
 @Auth.requires_token
-@Auth.requires_role(AccountRole.MANAGER.name)
 def find_services_manager(serviceStatus, filterSearch, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")

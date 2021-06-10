@@ -14,9 +14,32 @@ validator_memberATE = Schema({
     Optional('memberATEType'): And(Use(int), lambda t: 0 < t < 4),
 })
 
+validator_memberATE_password = Schema({
+    'idAccount': And(int),
+    'password': And(Use(str), lambda e: 254 > len(e) > 5),
+    'newPassword': And(Use(str), lambda e: 254 > len(e) > 5)
+})
+
+validator_memberATE_change = Schema({
+    'idAccount': And(int),
+    'username': And(str, Regex(r'^[A-Za-z0-9]{3,20}$')),
+    'name': And(str, Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
+    'lastName': And(str,
+                    Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
+    'dateBirth': And(str, Regex(r'^((19|20)\d\d)/(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])$')),
+    'email': And(Use(str), Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4),
+    'idCity': And(int),
+})
+
 validator_login = Schema({
     'username': And(str, Regex(r'^[A-Za-z0-9]{8,20}$')),
     'password': And(Use(str), lambda e: 254 > len(e) > 5)
+})
+
+validator_login_validator = Schema({
+    'username': And(str, Regex(r'^[A-Za-z0-9]{8,20}$')),
+    'password': And(Use(str), lambda e: 254 > len(e) > 5),
+    'code': And(Use(int), lambda t: 1000000 <= t <= 9999999),
 })
 
 validator_change_status_member = Schema({
@@ -35,14 +58,12 @@ validator_change_status_request = Schema({
 })
 
 validator_find_accounts = Schema({
-    'memberATEStatus': And(str, Regex(r'^[0-4]{1}$')),
-    'filterSearch': And(Use(str), lambda e: 100 > len(e) > 2),
+    'filterSearch': And(Use(str), lambda e: 100 > len(e) >= 1),
     'criterion': And(Use(str), lambda e: 9 > len(e) > 3)
 })
 
 validator_email = Schema({
-    'email': And(Use(str), Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4),
-    'messageSend': And(Use(str), lambda e: 400 > len(e) > 5)
+    'email': And(Use(str), Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4)
 })
 
 validator_city = Schema({
