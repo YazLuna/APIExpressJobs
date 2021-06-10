@@ -14,15 +14,15 @@ requestService = Blueprint("Requests", __name__)
 
 
 @requestService.route("/requests", methods=["POST"])
-@Auth.requires_role(AccountRole.CLIENT.name)
 @Auth.requires_token
+@Auth.requires_role(AccountRole.CLIENT.name)
 def add_request():
     json_values = request.json
     values_required = {"address", "date", "time", "trouble", "idMemberATE", "idService"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        if validator_request.is_valid(json_values):
+        if validator_request.validate(json_values):
             request_add = Request()
             request_add.address = json_values["address"]
             request_add.date = json_values["date"]
@@ -54,7 +54,7 @@ def change_status_request(requestId):
             request_change_status.id_request = requestId
             request_change_status.request_status = json_values["requestStatus"]
             result = request_change_status.change_status()
-            if result == ResponsesREST.SERVER_ERROR.value:
+            if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.INVALID_INPUT.value:
                 response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
             else:
                 response = Response(status=result)
@@ -82,7 +82,7 @@ def find_requests(requestStatus, filterSearch, criterion):
     return response
 
 
-@requestService.route("/requests/<requestId>", methods=["POST"])
+@requestService.route("/requests/<requestId>", methods=["GET"])
 @Auth.requires_token
 def get_request_by_id(requestId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),

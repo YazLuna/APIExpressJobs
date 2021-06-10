@@ -5,14 +5,14 @@ from src.routes.responses_rest import ResponsesREST
 
 class Request:
     def __init__(self):
-        self.id_request = ""
+        self.id_request = 0
         self.address = ""
         self.date = ""
         self.request_status = RequestStatus.REQUEST.value
         self.time = ""
         self.trouble = ""
-        self.id_memberATE = ""
-        self.id_service = ""
+        self.id_memberATE = 0
+        self.id_service = 0
         self.connect = Connection.build_from_static()
 
     def add_request(self):
@@ -50,10 +50,12 @@ class Request:
         if list_request:
             request = Request()
             list_request = list_request[0]
+            request.id_request = int(self.id_request)
             request.address = list_request["address"]
             request.date = list_request["date"]
+            request.date = request.date.strftime('%Y/%m/%d')
             request.request_status = list_request["requestStatus"]
-            request.time = list_request["time"]
+            request.time = str(list_request["time"])
             request.trouble = list_request["trouble"]
             request.id_service = list_request["idService"]
             request.id_memberATE = list_request["idMember"]
@@ -68,12 +70,13 @@ class Request:
             query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
                     "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
                     "MemberATE MA ON R.idMember = MA.idMemberATE WHERE R.requestStatus = %s " \
-                    "AND MA.name = %s;"
+                    "AND MA.idMemberATE = %s;"
         else:
-            query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
-                    "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
-                    "Service S on R.idService = S.idService WHERE R.requestStatus = %s " \
-                    "AND S.name = %s;"
+            if criterion == "service":
+                query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
+                        "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
+                        "Service S on R.idService = S.idService WHERE R.requestStatus = %s " \
+                        "AND S.idService = %s;"
         param = [request_status, filter_search]
         if query is not None:
             list_request = self.connect.select(query, param)
@@ -82,14 +85,14 @@ class Request:
                 for requests in list_request:
                     request = Request()
                     request.id_service = requests["idService"]
-                    request.name = requests["name"]
-                    request.description = requests["description"]
-                    request.slogan = requests["slogan"]
-                    request.type_service = requests["typeService"]
-                    request.working_hours = requests["workingHours"]
-                    request.service_status = requests["serviceStatus"]
-                    request.minimal_cost = requests["minimalCost"]
-                    request.maximum_cost = requests["maximumCost"]
+                    request.id_request = requests["idRequest"]
+                    request.id_memberATE = requests["idMember"]
+                    request.address = requests["address"]
+                    request.request_status = requests["requestStatus"]
+                    request.time = str(requests["time"])
+                    request.date = requests["date"]
+                    request.date = request.date.strftime('%Y/%m/%d')
+                    request.trouble = requests["trouble"]
                     request_list.append(request)
                 results = request_list
             else:
@@ -100,13 +103,25 @@ class Request:
 
     def change_status(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "UPDATE Request SET requestStatus = %s WHERE idRequest = %s "
-        param = [self.request_status,
-                 self.id_request]
-        result = self.connect.send_query(query, param)
-        if result:
-            results = ResponsesREST.SUCCESSFUL.value
+        if self.request_exist():
+            query = "UPDATE Request SET requestStatus = %s WHERE idRequest = %s "
+            param = [self.request_status,
+                     self.id_request]
+            result = self.connect.send_query(query, param)
+            if result:
+                results = ResponsesREST.SUCCESSFUL.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
+
+    def request_exist(self):
+        result = False
+        query = "SELECT idRequest FROM Request WHERE idRequest = %s;"
+        param = [self.id_request]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
 
     def json_request(self):
         return {"idRequest": self.id_request, "address": self.address,

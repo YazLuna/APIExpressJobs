@@ -4,6 +4,7 @@ import json
 from flask import Blueprint, Response, send_file
 
 from src.models.resource import Resource
+from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 
@@ -11,6 +12,7 @@ image = Blueprint("Images", __name__)
 
 
 @image.route("/images/<route>", methods=["GET"])
+@Auth.requires_token
 def get_image(route):
     resource_get = Resource()
     resource_get.route_save = route
