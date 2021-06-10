@@ -163,13 +163,25 @@ class Account:
 
     def add_employee_account(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "UPDATE MemberATE SET memberATEType = %s WHERE idMemberATE = %s "
-        param = [self.memberATE_type,
-                 self.id_memberATE]
-        result = self.connect.send_query(query, param)
-        if result:
-            results = ResponsesREST.SUCCESSFUL.value
+        if self.account_exists():
+            query = "UPDATE MemberATE SET memberATEType = %s WHERE idMemberATE = %s "
+            param = [self.memberATE_type,
+                     self.id_memberATE]
+            result = self.connect.send_query(query, param)
+            if result:
+                results = ResponsesREST.SUCCESSFUL.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
+
+    def account_exists(self):
+        result = False
+        query = "SELECT idMemberATE FROM MemberATE WHERE idMemberATE = %s;"
+        param = [self.id_memberATE]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
 
     def not_exist_other_account(self):
         result = True

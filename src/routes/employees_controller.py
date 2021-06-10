@@ -12,7 +12,7 @@ from src.validators.validators import validator_id
 employee = Blueprint("Employees", __name__)
 
 
-@employee.route("/employees/<idAccount>", methods=["PATCH"])
+@employee.route("/employees/<idAccount>", methods=["POST"])
 @Auth.requires_token
 @Auth.requires_role(AccountRole.CLIENT.name)
 def add_employee_account(idAccount):
@@ -24,7 +24,7 @@ def add_employee_account(idAccount):
         account_status.memberATE_type = AccountRole.CLIENT_EMPLOYEE.value
         result = account_status.add_employee_account()
         if result == ResponsesREST.SUCCESSFUL.value:
-            response = Response(json.dumps(status=result))
+            response = Response(status=result)
         else:
             response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
     return response
