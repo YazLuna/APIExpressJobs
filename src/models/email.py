@@ -11,7 +11,7 @@ class Email:
         result = ResponsesREST.SERVER_ERROR.value
         msg = MIMEMultipart()
 
-        message = message_send
+        message = "Su código de verificación es: "+str(message_send)
 
         password = "expressjobsMmolYalh"
         msg['From'] = "expressjobsapp@gmail.com"
