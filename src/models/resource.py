@@ -42,18 +42,21 @@ class Resource:
 
     def add_resource_server(self):
         response = ResponsesREST.SERVER_ERROR.value
-        self.route_save = self.get_route()
-        connect = ConnectServerResource()
-        resource_struct = ResourceStruct()
-        resource_struct.name = self.name
-        resource_struct.idService = self.id_service
-        resource_struct.idMemberATE = self.id_memberATE
-        resource_struct.isMainResource = self.is_main_resource
-        resource_struct.routeSave = self.route_save
-        resource_struct.resourceFile = self.resource_file.read()
-        response = connect.add_resource(resource_struct)
-        if response == ResponsesREST.CREATED.value:
-            response = self.add_resource()
+        if (self.id_service == 0 and self.id_memberATE == 0) or (self.id_service != 0 and self.id_memberATE != 0):
+            response = ResponsesREST.INVALID_INPUT.value
+        else:
+            self.route_save = self.get_route()
+            connect = ConnectServerResource()
+            resource_struct = ResourceStruct()
+            resource_struct.name = self.name
+            resource_struct.idService = self.id_service
+            resource_struct.idMemberATE = self.id_memberATE
+            resource_struct.isMainResource = self.is_main_resource
+            resource_struct.routeSave = self.route_save
+            resource_struct.resourceFile = self.resource_file.read()
+            response = connect.add_resource(resource_struct)
+            if response == ResponsesREST.CREATED.value:
+                response = self.add_resource()
         return response
 
     def get_route(self):
