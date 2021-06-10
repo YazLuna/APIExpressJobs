@@ -58,7 +58,7 @@ class Message:
                 message.message = messages["message"]
                 message.id_chat = messages["idChat"]
                 message.date_time = messages["dateTime"]
-                message.date_time = message.date_time.strftime('%Y/%m/%d')
+                message.date_time = message.date_time.strftime("%Y/%m/%d %H:%M:%S")
                 message.memberType = messages["memberType"]
                 message_list.append(message)
             results = message_list

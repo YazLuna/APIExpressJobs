@@ -11,10 +11,10 @@ def getDate():
 
 class Report:
     def __init__(self):
-        self.id_report = ""
+        self.id_report = 0
         self.reason = ""
-        self.id_service = ""
-        self.id_memberATE = ""
+        self.id_service = 0
+        self.id_memberATE = 0
         self.date = getDate()
         self.connect = Connection.build_from_static()
 
@@ -47,17 +47,17 @@ class Report:
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "memberATE":
-            query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date " \
+            query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date, R.idReport " \
                     "FROM Report R INNER JOIN MemberATE MA ON R.idMemberATE = MA.idMemberATE " \
                     "WHERE MA.name = %s;"
         else:
             if criterion == "service":
-                query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date " \
+                query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date, R.idReport " \
                         "FROM Report R INNER JOIN Service S ON R.idService = S.idService " \
                         "WHERE S.name = %s;"
             else:
                 if criterion == "date":
-                    query = "SELECT idReport, reason, idMemberATE, idService, date " \
+                    query = "SELECT idReport, reason, idMemberATE, idService, date, R.idReport " \
                             "FROM Report WHERE date = %s;"
         param = [filter_search]
         if query is not None:
@@ -69,7 +69,9 @@ class Report:
                     report.id_service = reports["idService"]
                     report.reason = reports["reason"]
                     report.date = reports["date"]
+                    report.date = report.date.strftime('%Y/%m/%d')
                     report.id_memberATE = reports["idMemberATE"]
+                    report.id_report = reports["idReport"]
                     reports_list.append(report)
                 results = reports_list
             else:
@@ -80,14 +82,17 @@ class Report:
 
     def consult_report(self):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "SELECT idMemberATE, reason, date, idService FROM Report WHERE idReport = %s"
+        query = "SELECT idMemberATE, reason, date, idService, idReport FROM Report WHERE idReport = %s"
         param = [self.id_report]
         reports = self.connect.select(query, param)
         if reports:
             report = Report()
+            reports = reports[0]
+            report.id_report = reports["idReport"]
             report.id_service = reports["idService"]
             report.reason = reports["reason"]
             report.date = reports["date"]
+            report.date = report.date.strftime('%Y/%m/%d')
             report.id_memberATE = reports["idMemberATE"]
             results = report
         else:
@@ -95,6 +100,5 @@ class Report:
         return results
 
     def json_report(self):
-        self.convert_date()
         return {"idReport": self.id_report, "reason": self.reason,
                 "idService": self.id_service, "idMemberATE": self.id_memberATE}
