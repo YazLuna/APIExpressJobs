@@ -36,8 +36,8 @@ def add_report():
 
 
 @report.route("/reports/<reportId>", methods=["GET"])
-@Auth.requires_role(AccountRole.MANAGER.name)
 @Auth.requires_token
+@Auth.requires_role(AccountRole.MANAGER.name)
 def get_report_by_id(reportId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -54,8 +54,8 @@ def get_report_by_id(reportId):
 
 
 @report.route("/reports/<filterSearch>/<criterion>", methods=["GET"])
-@Auth.requires_role(AccountRole.MANAGER.name)
 @Auth.requires_token
+@Auth.requires_role(AccountRole.MANAGER.name)
 def get_reports(filterSearch, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
