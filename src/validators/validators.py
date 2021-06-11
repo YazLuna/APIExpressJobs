@@ -69,7 +69,7 @@ validator_email = Schema({
 validator_city = Schema({
     'name': And(Use(str),
                 Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{5,50}'),
-                lambda e: 51 > len(e) > 4),
+                lambda e: 101 > len(e) > 4),
     'idState': And(int)
 })
 

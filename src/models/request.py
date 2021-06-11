@@ -67,33 +67,47 @@ class Request:
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "memberATE":
-            query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
-                    "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
-                    "MemberATE MA ON R.idMember = MA.idMemberATE WHERE R.requestStatus = %s " \
-                    "AND MA.idMemberATE = %s;"
+            query = "SELECT S.name, R.address, R.date, R.requestStatus, R.time, R.trouble, R.idMember, R.idService, " \
+                    "R.idRequest FROM Request R INNER JOIN MemberATE MA ON R.idMember = MA.idMemberATE " \
+                    "INNER JOIN Service S on R.idService = S.idService WHERE R.requestStatus = %s AND" \
+                    " MA.idMemberATE = %s;"
         else:
             if criterion == "service":
-                query = "SELECT R.address, R.date, R.requestStatus, R.time, R.trouble, " \
-                        "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN " \
-                        "Service S on R.idService = S.idService WHERE R.requestStatus = %s " \
-                        "AND S.idService = %s;"
+                query = "SELECT MA.name, MA.lastName, R.address, R.date, R.requestStatus, R.time, R.trouble, " \
+                        "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN Service S ON " \
+                        "R.idService = S.idService INNER JOIN MemberATE MA ON R.idMember = MA.idMemberATE " \
+                        "WHERE R.requestStatus = %s AND S.idMemberATE = %s;"
         param = [request_status, filter_search]
         if query is not None:
             list_request = self.connect.select(query, param)
             if list_request:
                 request_list = []
-                for requests in list_request:
-                    request = Request()
-                    request.id_service = requests["idService"]
-                    request.id_request = requests["idRequest"]
-                    request.id_memberATE = requests["idMember"]
-                    request.address = requests["address"]
-                    request.request_status = requests["requestStatus"]
-                    request.time = str(requests["time"])
-                    request.date = requests["date"]
-                    request.date = request.date.strftime('%Y/%m/%d')
-                    request.trouble = requests["trouble"]
-                    request_list.append(request)
+                if criterion == "memberATE":
+                    for requests in list_request:
+                        request = Request()
+                        request.id_service = requests["name"]
+                        request.id_request = requests["idRequest"]
+                        request.id_memberATE = requests["idMember"]
+                        request.address = requests["address"]
+                        request.request_status = requests["requestStatus"]
+                        request.time = str(requests["time"])
+                        request.date = requests["date"]
+                        request.date = request.date.strftime('%Y/%m/%d')
+                        request.trouble = requests["trouble"]
+                        request_list.append(request)
+                else:
+                    for requests in list_request:
+                        request = Request()
+                        request.id_service = requests["idService"]
+                        request.id_request = requests["idRequest"]
+                        request.id_memberATE = requests["name"] + " " + requests["lastName"]
+                        request.address = requests["address"]
+                        request.request_status = requests["requestStatus"]
+                        request.time = str(requests["time"])
+                        request.date = requests["date"]
+                        request.date = request.date.strftime('%Y/%m/%d')
+                        request.trouble = requests["trouble"]
+                        request_list.append(request)
                 results = request_list
             else:
                 results = ResponsesREST.NOT_FOUND.value
