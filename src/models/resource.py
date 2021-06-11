@@ -141,6 +141,27 @@ class Resource:
             results = ResponsesREST.NOT_FOUND.value
         return results
 
+    def get_main_resource_account(self):
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
+                " FROM Resource WHERE idMemberATE = %s AND isMainResource = %s;"
+        self.is_main_resource = ResourceType.MAIN_RESOURCE.value
+        param = [self.id_memberATE, self.is_main_resource]
+        list_resource = self.connect.select(query, param)
+        if list_resource:
+            resource_list = list_resource[0]
+            resource = Resource()
+            resource.id_resource = resource_list["idResource"]
+            resource.is_main_resource = resource_list["isMainResource"]
+            resource.route_save = resource_list["routeSave"]
+            resource.name = resource_list["name"]
+            resource.id_memberATE = resource_list["idMemberATE"]
+            resource.id_service = resource_list["idService"]
+            results = resource
+        else:
+            results = ResponsesREST.NOT_FOUND.value
+        return results
+
     def delete_resource(self):
         results = ResponsesREST.SERVER_ERROR.value
         query = "DELETE FROM Resource WHERE routeSave = %s; "
