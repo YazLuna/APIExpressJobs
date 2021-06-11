@@ -91,6 +91,23 @@ def find_resources_main(serviceId):
     return response
 
 
+@resource.route("/resources/memberATEMain/<memberATEId>", methods=["GET"])
+@Auth.requires_token
+def find_resource_main_memberATE(memberATEId):
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({'id': memberATEId}):
+        get_resources_memberATE = Resource()
+        get_resources_memberATE.id_memberATE = memberATEId
+        result = get_resources_memberATE.get_main_resource_account()
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        else:
+            response = Response(json.dumps(result.json_resource()), status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response
+
+
 @resource.route("/resources/<resourceId>", methods=["GET"])
 @Auth.requires_token
 def get_resource_by_id(resourceId):
