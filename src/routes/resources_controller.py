@@ -92,7 +92,7 @@ def find_resources_main(serviceId):
 
 
 @resource.route("/resources/memberATEMain/<memberATEId>", methods=["GET"])
-#@Auth.requires_token
+@Auth.requires_token
 def find_resource_main_memberATE(memberATEId):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
