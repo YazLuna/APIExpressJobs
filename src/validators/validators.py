@@ -29,15 +29,18 @@ validator_memberATE_change = Schema({
     'dateBirth': And(str, Regex(r'^((19|20)\d\d)/(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])$')),
     'email': And(Use(str), Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4),
     'idCity': And(int),
+    Optional('memberATEStatus'): And(Use(int), lambda s: 0 < s < 4),
+    Optional('memberATEType'): And(Use(int), lambda t: 0 < t < 3),
+    Optional('password'): And(Use(str), lambda e: 254 > len(e) > 5),
 })
 
 validator_login = Schema({
-    'username': And(str, Regex(r'^[A-Za-z0-9]{8,20}$')),
+    'username': And(str, Regex(r'^[A-Za-z0-9]{3,20}$')),
     'password': And(Use(str), lambda e: 254 > len(e) > 5)
 })
 
 validator_login_validator = Schema({
-    'username': And(str, Regex(r'^[A-Za-z0-9]{8,20}$')),
+    'username': And(str, Regex(r'^[A-Za-z0-9]{3,20}$')),
     'password': And(Use(str), lambda e: 254 > len(e) > 5),
     'code': And(Use(int), lambda t: 1000000 <= t <= 9999999),
 })

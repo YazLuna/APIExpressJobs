@@ -40,19 +40,19 @@ def add_account():
     return response
 
 
-@account.route("/accounts/<idAccount>", methods=["PATCH"])
+@account.route("/accounts/<accountId>", methods=["PATCH"])
 @Auth.requires_token
-def change_status_account(idAccount):
+def change_status_account(accountId):
     json_values = request.json
     values_required = {"memberATEStatus"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         json_validator = json_values
-        json_validator["idAccount"] = idAccount
+        json_validator["idAccount"] = accountId
         if validator_change_status_member.is_valid(json_validator):
             account_status = Account()
-            account_status.id_memberATE = idAccount
+            account_status.id_memberATE = accountId
             account_status.memberATE_status = json_values["memberATEStatus"]
             result = account_status.change_status()
             if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.INVALID_INPUT.value:

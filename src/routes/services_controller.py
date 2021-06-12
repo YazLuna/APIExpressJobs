@@ -76,19 +76,19 @@ def change_service(serviceId):
     return response
 
 
-@service.route("/services/<idService>", methods=["PATCH"])
+@service.route("/services/<serviceId>", methods=["PATCH"])
 @Auth.requires_token
-def change_status(idService):
+def change_status(serviceId):
     json_values = request.json
     values_required = {"serviceStatus"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         json_validator = json_values
-        json_validator["idService"] = idService
+        json_validator["idService"] = serviceId
         if validator_change_status_service.is_valid(json_validator):
             service_change_status = Service()
-            service_change_status.id_service = idService
+            service_change_status.id_service = serviceId
             service_change_status.service_status = json_values["serviceStatus"]
             result = service_change_status.change_status()
             if result == ResponsesREST.SUCCESSFUL.value:
