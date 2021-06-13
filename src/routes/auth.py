@@ -1,3 +1,4 @@
+"""This module manages authentication and authorization."""
 import json
 from datetime import datetime
 from functools import update_wrapper
@@ -11,25 +12,30 @@ from src.routes.exception_responses_json import json_not_authorized, json_token_
 from src.routes.responses_rest import ResponsesREST
 
 
-def get_member_type(memberATEType):
+def get_member_type(member_ate_type):
+    """This function returns the name of the memberATE type."""
     result = AccountRole.CLIENT.name
-    if memberATEType == AccountRole.MANAGER.value:
+    if member_ate_type == AccountRole.MANAGER.value:
         result = AccountRole.MANAGER.name
     else:
-        if memberATEType == AccountRole.CLIENT_EMPLOYEE.value:
+        if member_ate_type == AccountRole.CLIENT_EMPLOYEE.value:
             result = AccountRole.CLIENT_EMPLOYEE.name
     return result
 
 
 class Auth:
+    """This class manages authentication and authorization."""
     secret_password: bytes = None
 
     @staticmethod
     def set_password():
+        """This function sets the password."""
         Auth.secret_password = Fernet.generate_key()
 
     @staticmethod
     def requires_token(operation):
+        """This function checks if the access token is correct."""
+
         def verify_auth(*args, **kwargs):
             token = request.headers.get("Token")
             saved_token = None
@@ -39,7 +45,8 @@ class Auth:
                     session.modified = True
                     response = operation(*args, **kwargs)
                 else:
-                    response = Response(json.dumps(json_token_errors(ResponsesREST.NOT_AUTHENTICATED.value)),
+                    response = Response(json.dumps(json_token_errors
+                                                   (ResponsesREST.NOT_AUTHENTICATED.value)),
                                         status=ResponsesREST.NOT_AUTHENTICATED.value,
                                         mimetype="application/json")
             except KeyError:
@@ -48,7 +55,8 @@ class Auth:
                                         status=ResponsesREST.TIME_OUT.value,
                                         mimetype="application/json")
                 else:
-                    response = Response(json.dumps(json_token_errors(ResponsesREST.NOT_AUTHENTICATED.value)),
+                    response = Response(json.dumps(json_token_errors
+                                                   (ResponsesREST.NOT_AUTHENTICATED.value)),
                                         status=ResponsesREST.NOT_AUTHENTICATED.value,
                                         mimetype="application/json")
             return response
@@ -57,6 +65,8 @@ class Auth:
 
     @staticmethod
     def requires_role(role: str):
+        """This function verifies the authorization of the memberATE."""
+
         def decorator(operation):
             def verify_role(*args, **kwargs):
                 token = request.headers.get("Token")
@@ -65,10 +75,12 @@ class Auth:
                     if str(values["role"]) == str(role):
                         response = operation(*args, **kwargs)
                     else:
-                        response = Response(json.dumps(json_not_authorized()), status=ResponsesREST.NOT_AUTHORIZED.value,
+                        response = Response(json.dumps(json_not_authorized()),
+                                            status=ResponsesREST.NOT_AUTHORIZED.value,
                                             mimetype="application/json")
                 else:
-                    response = Response(json.dumps(json_not_authorized()), status=ResponsesREST.NOT_AUTHORIZED.value,
+                    response = Response(json.dumps(json_not_authorized()),
+                                        status=ResponsesREST.NOT_AUTHORIZED.value,
                                         mimetype="application/json")
                 return response
 
@@ -78,6 +90,7 @@ class Auth:
 
     @staticmethod
     def generate_token(account: Account) -> str:
+        """This function generates the access token to the membersATE."""
         if Auth.secret_password is None:
             Auth.set_password()
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -89,6 +102,7 @@ class Auth:
 
     @staticmethod
     def decode_token(token: str) -> dict:
+        """This function decodes the access token of the membersATE."""
         decoded_token = Auth.decode(token, Auth.secret_password)
         decoded_token = decoded_token.split("/")
         return {
@@ -99,8 +113,10 @@ class Auth:
 
     @staticmethod
     def encode(value: str, key: bytes) -> str:
+        """This function encodes the access token."""
         return Fernet(key).encrypt(value.encode()).decode()
 
     @staticmethod
     def decode(value: str, key: bytes) -> str:
+        """This function decodes the access token."""
         return Fernet(key).decrypt(value.encode()).decode()

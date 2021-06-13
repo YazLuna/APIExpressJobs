@@ -1,3 +1,4 @@
+"""This module manages ratings."""
 import json
 
 from flask import Blueprint, request, Response
@@ -15,6 +16,7 @@ rating = Blueprint("Ratings", __name__)
 @rating.route("/ratings", methods=["POST"])
 @Auth.requires_token
 def add_rating():
+    """This function adds a rating."""
     json_values = request.json
     values_required = {"comment", "rating", "idRequest"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -27,28 +29,33 @@ def add_rating():
             rating_add.id_request = json_values["idRequest"]
             result = rating_add.add_rating()
             if result == ResponsesREST.CREATED.value:
-                response = Response(json.dumps(rating_add.json_rating()), status=ResponsesREST.CREATED.value,
+                response = Response(json.dumps(rating_add.json_rating()),
+                                    status=ResponsesREST.CREATED.value,
                                     mimetype="application/json")
             else:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
     return response
 
 
-@rating.route("/ratings/<idService>", methods=["GET"])
+@rating.route("/ratings/<id_service>", methods=["GET"])
 @Auth.requires_token
 @Auth.requires_role(AccountRole.CLIENT.name)
-def find_ratings(idService):
+def find_ratings(id_service):
+    """This function retrieves all the ratings of a service."""
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_id.is_valid({"id": idService}):
+    if validator_id.is_valid({"id": id_service}):
         get_ratings = Rating()
-        result = get_ratings.find_ratings(idService)
-        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        result = get_ratings.find_ratings(id_service)
+        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
+            response = Response(json.dumps(json_error(result)),
+                                status=result, mimetype="application/json")
         else:
             list_ratings = []
             for ratings_found in result:
                 list_ratings.append(ratings_found.json_rating())
-            response = Response(json.dumps(list_ratings), status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps(list_ratings),
+                                status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
