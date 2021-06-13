@@ -1,7 +1,9 @@
+"""This module contains the types of REST response that the API returns."""
 from enum import Enum
 
 
 class ResponsesREST(Enum):
+    """This enumeration contains the types of REST response that the API returns."""
     CREATED = 201
     SUCCESSFUL = 200
     SERVER_ERROR = 500

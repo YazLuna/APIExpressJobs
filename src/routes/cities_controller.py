@@ -1,3 +1,4 @@
+"""This module manages the cities."""
 import json
 
 from flask import Blueprint, request, Response
@@ -12,6 +13,7 @@ city = Blueprint("Cites", __name__)
 
 @city.route("/cities", methods=["POST"])
 def add_city():
+    """This function adds a city to a state in the database."""
     json_values = request.json
     values_required = {"name", "idState"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -23,43 +25,51 @@ def add_city():
             city_add.id_state = json_values["idState"]
             result = city_add.add_city()
             if result == ResponsesREST.CREATED.value:
-                response = Response(json.dumps(city_add.json_city()), status=ResponsesREST.CREATED.value,
+                response = Response(json.dumps(city_add.json_city()),
+                                    status=ResponsesREST.CREATED.value,
                                     mimetype="application/json")
             else:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
     return response
 
 
-@city.route("/cities/<cityId>", methods=["GET"])
-def get_city_by_id(cityId):
+@city.route("/cities/<city_id>", methods=["GET"])
+def get_city_by_id(city_id):
+    """This function gets a city according to its ID."""
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_id.is_valid({"id": cityId}):
+    if validator_id.is_valid({"id": city_id}):
         city_get = City()
-        city_get.id_city = cityId
+        city_get.id_city = city_id
         result = city_get.get_city()
-        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
+            response = Response(json.dumps(json_error(result)),
+                                status=result, mimetype="application/json")
         else:
-            response = Response(json.dumps(result.json_city()), status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps(result.json_city()),
+                                status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
 
 
-@city.route("/cities/state/<idState>", methods=["GET"])
-def get_cities(idState):
+@city.route("/cities/state/<id_state>", methods=["GET"])
+def get_cities(id_state):
+    """This function gets all the cities in a state."""
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_id.is_valid({"id": idState}):
+    if validator_id.is_valid({"id": id_state}):
         get_city = City()
-        get_city.id_state = idState
+        get_city.id_state = id_state
         result = get_city.find_cities()
-        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
+            response = Response(json.dumps(json_error(result)),
+                                status=result, mimetype="application/json")
         else:
             list_cities = []
             for cities_found in result:
                 list_cities.append(cities_found.json_city())
-            response = Response(json.dumps(list_cities), status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps(list_cities),
+                                status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response

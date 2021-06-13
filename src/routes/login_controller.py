@@ -1,3 +1,4 @@
+"""This module manage the logins."""
 import json
 
 from flask import Blueprint, request, Response, session
@@ -16,6 +17,7 @@ login = Blueprint("Logins", __name__)
 
 @login.route("/logins", methods=["POST"])
 def create_token():
+    """This function logs in and generates the access token."""
     json_values = request.json
     values_required = {"username", "password"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -27,8 +29,8 @@ def create_token():
             account_login.password = encode_password(json_values["password"])
             account_login.memberATE_status = AccountStatus.ACTIVE.value
             result = account_login.login()
-            if result == ResponsesREST.SERVER_ERROR.value or result == ResponsesREST.NOT_FOUND.value or \
-                    result == ResponsesREST.INVALID_REQUEST.value:
+            if result in (ResponsesREST.SERVER_ERROR.value, ResponsesREST.NOT_FOUND.value,
+                          ResponsesREST.INVALID_REQUEST.value):
                 response = Response(json.dumps(json_error(result)),
                                     status=result,
                                     mimetype="application/json")
@@ -39,7 +41,8 @@ def create_token():
                 token = Auth.generate_token(account_login)
                 session.permanent = True
                 session["token"] = token
-                response = Response(json.dumps({"token": token, "memberATEType": account_login.memberATE_type,
+                response = Response(json.dumps({"token": token,
+                                                "memberATEType": account_login.memberATE_type,
                                                 "idMemberATE": account_login.id_memberATE,
                                                 "idCity": account_login.id_city}),
                                     status=ResponsesREST.CREATED.value, mimetype="application/json")
@@ -50,6 +53,7 @@ def create_token():
 @Auth.requires_token
 @Auth.requires_role(AccountRole.CLIENT_EMPLOYEE.name)
 def update_token():
+    """This function changes an employee's token so that he can sign in as a client."""
     json_values = request.json
     values_required = {"username", "password"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -62,13 +66,15 @@ def update_token():
             token = Auth.generate_token(account_login)
             session.permanent = True
             session["token"] = token
-            response = Response(json.dumps({"token": token}), status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps({"token": token}),
+                                status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
 
 
 @login.route("/logins/validator", methods=["PATCH"])
 def validate_account():
+    """This function validates an account so that you can log in."""
     json_values = request.json
     values_required = {"username", "password", "code"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -82,5 +88,6 @@ def validate_account():
             if result == ResponsesREST.SUCCESSFUL.value:
                 response = Response(status=result)
             else:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
     return response

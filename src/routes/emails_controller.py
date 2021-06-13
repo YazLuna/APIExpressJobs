@@ -1,3 +1,4 @@
+"""This module manages the sending of messages to an email."""
 import json
 
 from flask import Blueprint, request, Response
@@ -12,6 +13,7 @@ email = Blueprint("Emails", __name__)
 
 @email.route("/emails", methods=["POST"])
 def send_message_to_account():
+    """This function updates the verification code and sends it to the email."""
     json_values = request.json
     values = {"email"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
@@ -25,5 +27,6 @@ def send_message_to_account():
                 response = Response(json.dumps({"email": account.email}),
                                     status=result, mimetype="application/json")
             else:
-                response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
     return response
