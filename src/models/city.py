@@ -1,10 +1,11 @@
-import mysql
-
-from src.connect_database.Connection import Connection
+"""This module manages the cities."""
+from src.connect_database.connection_database import Connection
 from src.routes.responses_rest import ResponsesREST
 
 
 class City:
+    """This class manages the cities."""
+
     def __init__(self):
         self.id_state = ""
         self.id_city = ""
@@ -12,6 +13,7 @@ class City:
         self.connect = Connection.build_from_static()
 
     def add_city(self):
+        """This function adds a city."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "INSERT INTO City (name, idState) VALUES (%s, %s); "
         param = [self.name,
@@ -25,6 +27,7 @@ class City:
         return results
 
     def get_id(self):
+        """This function gets the ID of the created city."""
         query = "SELECT idCity FROM City order by idCity desc limit 1;"
         response = self.connect.select(query)
         city = City()
@@ -34,6 +37,7 @@ class City:
         return city.id_city
 
     def get_city(self):
+        """This function obtains the city information according to an ID."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCity, name, idState FROM City WHERE idCity = %s;"
         param = [self.id_city]
@@ -50,6 +54,7 @@ class City:
         return results
 
     def find_cities(self):
+        """This function obtains the city information according to a state."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCity, name, idState FROM City WHERE idState = %s;"
         param = [self.id_state]
@@ -68,4 +73,5 @@ class City:
         return results
 
     def json_city(self):
+        """This function returns the city data in JSON serializable format."""
         return {"idCity": self.id_city, "idState": self.id_state, "name": self.name}

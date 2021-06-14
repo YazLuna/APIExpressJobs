@@ -35,7 +35,7 @@ def add_service():
             service_add.minimal_cost = json_values["minimalCost"]
             service_add.maximum_cost = json_values["maximumCost"]
             service_add.id_city = json_values["idCity"]
-            service_add.id_memberATE = json_values["idMemberATE"]
+            service_add.id_member_ate = json_values["idMemberATE"]
             result = service_add.add_service()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(service_add.json_service()),
@@ -71,7 +71,7 @@ def change_service(service_id):
             service_change.minimal_cost = json_values["minimalCost"]
             service_change.maximum_cost = json_values["maximumCost"]
             service_change.id_city = json_values["idCity"]
-            service_change.id_memberATE = int(json_values["idMemberATE"])
+            service_change.id_member_ate = int(json_values["idMemberATE"])
             result = service_change.change_service()
             if result == ResponsesREST.SUCCESSFUL.value:
                 response = Response(json.dumps(service_change.json_service()),
@@ -165,7 +165,7 @@ def find_services_employee(id_member_ate):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_id.is_valid({"id": id_member_ate}):
         get_services = Service()
-        get_services.id_memberATE = id_member_ate
+        get_services.id_member_ate = id_member_ate
         result = get_services.get_services_employee()
         if result in (ResponsesREST.SERVER_ERROR.value, ResponsesREST.NOT_FOUND.value):
             response = Response(json.dumps(json_error(result)),

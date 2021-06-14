@@ -27,7 +27,7 @@ def create_token():
             account_login = Account()
             account_login.username = json_values["username"]
             account_login.password = encode_password(json_values["password"])
-            account_login.memberATE_status = AccountStatus.ACTIVE.value
+            account_login.member_ate_status = AccountStatus.ACTIVE.value
             result = account_login.login()
             if result in (ResponsesREST.SERVER_ERROR.value, ResponsesREST.NOT_FOUND.value,
                           ResponsesREST.INVALID_REQUEST.value):
@@ -35,15 +35,15 @@ def create_token():
                                     status=result,
                                     mimetype="application/json")
             else:
-                account_login.memberATE_type = result.memberATE_type
-                account_login.id_memberATE = result.id_memberATE
+                account_login.member_ate_type = result.member_ate_type
+                account_login.id_member_ate = result.id_member_ate
                 account_login.id_city = result.id_city
                 token = Auth.generate_token(account_login)
                 session.permanent = True
                 session["token"] = token
                 response = Response(json.dumps({"token": token,
-                                                "memberATEType": account_login.memberATE_type,
-                                                "idMemberATE": account_login.id_memberATE,
+                                                "memberATEType": account_login.member_ate_type,
+                                                "idMemberATE": account_login.id_member_ate,
                                                 "idCity": account_login.id_city}),
                                     status=ResponsesREST.CREATED.value, mimetype="application/json")
     return response

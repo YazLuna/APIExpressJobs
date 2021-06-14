@@ -19,7 +19,7 @@ account = Blueprint("Accounts", __name__)
 def add_account():
     """This function adds an account and sends the verification code to the email address."""
     json_values = request.json
-    values_required = {"username", "password", "name", "lastName", "dateBirth",
+    values_required = {"username", "password", "name", "lastname", "dateBirth",
                        "email", "idCity"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -29,11 +29,11 @@ def add_account():
             account_add.username = json_values["username"]
             account_add.password = encode_password(json_values["password"])
             account_add.name = json_values["name"]
-            account_add.lastName = json_values["lastName"]
+            account_add.lastname = json_values["lastname"]
             account_add.date_birth = json_values["dateBirth"]
             account_add.email = json_values["email"]
             account_add.id_city = json_values["idCity"]
-            result = account_add.add_memberATE()
+            result = account_add.add_member_ate()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(account_add.json_account()),
                                     status=ResponsesREST.CREATED.value,
@@ -58,8 +58,8 @@ def change_status_account(account_id):
         json_validator["idAccount"] = account_id
         if validator_change_status_member.is_valid(json_validator):
             account_status = Account()
-            account_status.id_memberATE = account_id
-            account_status.memberATE_status = json_values["memberATEStatus"]
+            account_status.id_member_ate = account_id
+            account_status.member_ate_status = json_values["memberATEStatus"]
             result = account_status.change_status()
             if result in (ResponsesREST.SERVER_ERROR.value,
                           ResponsesREST.INVALID_INPUT.value):
@@ -105,7 +105,7 @@ def get_account_by_id(account_id):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_id.is_valid({'id': account_id}):
         account_get = Account()
-        account_get.id_memberATE = account_id
+        account_get.id_member_ate = account_id
         result = account_get.consult_account()
         if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
             response = Response(json.dumps(json_error(result)),
@@ -122,7 +122,7 @@ def get_account_by_id(account_id):
 def change_account(account_id):
     """This function changes all the details of an account according to its ID."""
     json_values = request.json
-    values_required = {"username", "name", "lastName", "dateBirth",
+    values_required = {"username", "name", "lastname", "dateBirth",
                        "email", "idCity"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
@@ -131,10 +131,10 @@ def change_account(account_id):
         json_validator["idAccount"] = int(account_id)
         if validator_memberATE_change.is_valid(json_validator):
             account_change = Account()
-            account_change.id_memberATE = int(account_id)
+            account_change.id_member_ate = int(account_id)
             account_change.username = json_values["username"]
             account_change.name = json_values["name"]
-            account_change.lastName = json_values["lastName"]
+            account_change.lastname = json_values["lastname"]
             account_change.date_birth = json_values["dateBirth"]
             account_change.email = json_values["email"]
             account_change.id_city = json_values["idCity"]
@@ -162,7 +162,7 @@ def change_password(account_id):
         json_validator["idAccount"] = int(account_id)
         if validator_memberATE_password.is_valid(json_validator):
             account_change = Account()
-            account_change.id_memberATE = int(account_id)
+            account_change.id_member_ate = int(account_id)
             account_change.password = encode_password(json_values["password"])
             result = account_change.update_password(encode_password(json_values["newPassword"]))
             if result == ResponsesREST.SUCCESSFUL.value:

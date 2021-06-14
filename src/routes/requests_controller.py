@@ -30,7 +30,7 @@ def add_request():
             request_add.date = json_values["date"]
             request_add.time = json_values["time"]
             request_add.trouble = json_values["trouble"]
-            request_add.id_memberATE = json_values["idMemberATE"]
+            request_add.id_member_ate = json_values["idMemberATE"]
             request_add.id_service = json_values["idService"]
             result = request_add.add_request()
             if result == ResponsesREST.CREATED.value:

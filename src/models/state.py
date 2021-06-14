@@ -1,8 +1,11 @@
-from src.connect_database.Connection import Connection
+"""This module manages the states."""
+from src.connect_database.connection_database import Connection
 from src.routes.responses_rest import ResponsesREST
 
 
 class State:
+    """This class manages the states."""
+
     def __init__(self):
         self.id_state = ""
         self.id_country = ""
@@ -10,6 +13,7 @@ class State:
         self.connect = Connection.build_from_static()
 
     def get_state(self):
+        """This function finds a status according to its ID."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCountry, name, idState FROM State WHERE idState = %s;"
         param = [self.id_state]
@@ -26,6 +30,7 @@ class State:
         return results
 
     def find_states(self):
+        """This function finds the states of a country."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCountry, name, idState FROM State WHERE idCountry = %s;"
         param = [self.id_country]
@@ -44,4 +49,5 @@ class State:
         return results
 
     def json_state(self):
+        """This function returns the state data in JSON serializable format."""
         return {"idState": self.id_state, "idCountry": self.id_country, "name": self.name}
