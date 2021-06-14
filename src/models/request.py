@@ -76,7 +76,7 @@ class Request:
                 query = "SELECT MA.name, MA.lastName, R.address, R.date, R.requestStatus, R.time, R.trouble, " \
                         "R.idMember, R.idService, R.idRequest FROM Request R INNER JOIN Service S ON " \
                         "R.idService = S.idService INNER JOIN MemberATE MA ON R.idMember = MA.idMemberATE " \
-                        "WHERE R.requestStatus = %s AND S.idMemberATE = %s;"
+                        "WHERE R.requestStatus = %s AND S.idService = %s;"
         param = [request_status, filter_search]
         if query is not None:
             list_request = self.connect.select(query, param)
@@ -87,7 +87,7 @@ class Request:
                         request = Request()
                         request.id_service = requests["name"]
                         request.id_request = requests["idRequest"]
-                        request.id_memberATE = requests["idMember"]
+                        request.id_memberATE = requests["idService"]
                         request.address = requests["address"]
                         request.request_status = requests["requestStatus"]
                         request.time = str(requests["time"])
@@ -98,7 +98,7 @@ class Request:
                 else:
                     for requests in list_request:
                         request = Request()
-                        request.id_service = requests["idService"]
+                        request.id_service = requests["idMemberATE"]
                         request.id_request = requests["idRequest"]
                         request.id_memberATE = requests["name"] + " " + requests["lastName"]
                         request.address = requests["address"]
@@ -139,6 +139,6 @@ class Request:
 
     def json_request(self):
         return {"idRequest": self.id_request, "address": self.address,
-                "date": self.date, "request_status": self.request_status,
+                "date": self.date, "requestStatus": self.request_status,
                 "time": self.time, "trouble": self.trouble,
                 "idMemberATE": self.id_memberATE, "idService": self.id_service}
