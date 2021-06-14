@@ -112,7 +112,8 @@ validator_rating = Schema({
                    Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9]*){5,150}'),
                    lambda e: 151 > len(e) > 4),
     'rating': And(Use(int), lambda r: 0 < r < 6),
-    'idRequest': And(int)
+    'idRequest': And(int),
+    "isClient": And(Use(int), lambda r: 0 < r < 3)
 })
 
 validator_report = Schema({
@@ -164,6 +165,18 @@ validator_service = Schema({
 
 validator_id = Schema({
     'id': And(str, Regex(r'^[0-9]{1,10}$'))
+})
+
+validator_email_account = Schema({
+    'email': And(Use(str), Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4),
+    'messageSend': And(Use(str),
+                       Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{4,}'),
+                       lambda e: len(e) > 4)
+})
+
+validator_request_client = Schema({
+    'id': And(str, Regex(r'^[0-9]{1,10}$')),
+    'isClient': And(str, Regex(r'^[0-9]{1,10}$'))
 })
 
 validator_find_chats = Schema({

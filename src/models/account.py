@@ -172,20 +172,20 @@ class Account:
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "email":
-            query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus, idCity " \
-                    "FROM MemberATE WHERE email = %s "
+            query = "SELECT idMemberATE, email, dateBirth, username, lastName, name, memberATEType, memberATEStatus, " \
+                    "idCity FROM MemberATE WHERE email = %s "
         else:
             if criterion == "name":
-                query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus, " \
-                        "idCity FROM MemberATE WHERE name = %s "
+                query = "SELECT idMemberATE, email, dateBirth, username, lastName, name, memberATEType, " \
+                        "memberATEStatus, idCity FROM MemberATE WHERE name = %s "
             else:
                 if criterion == "lastname":
-                    query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus, " \
-                            "idCity FROM MemberATE WHERE lastName = %s "
+                    query = "SELECT idMemberATE, email, dateBirth, username, lastName, name, memberATEType, " \
+                            "memberATEStatus, idCity FROM MemberATE WHERE lastName = %s "
                 else:
                     if criterion == "status":
-                        query = "SELECT idMemberATE, email, dateBirth, lastName, name, memberATEType, memberATEStatus, " \
-                                "idCity FROM MemberATE WHERE memberATEStatus = %s "
+                        query = "SELECT idMemberATE, email, dateBirth, username, lastName, name, memberATEType, " \
+                                "memberATEStatus, idCity FROM MemberATE WHERE memberATEStatus = %s "
         param = [filter_search]
         if query is not None:
             list_account = self.connect.select(query, param)
@@ -196,6 +196,7 @@ class Account:
                     account.id_memberATE = accounts["idMemberATE"]
                     account.email = accounts["email"]
                     account.name = accounts["name"]
+                    account.username = accounts["username"]
                     account.lastName = accounts["lastName"]
                     account.date_birth = accounts["dateBirth"]
                     account.date_birth = account.date_birth.strftime('%Y/%m/%d')

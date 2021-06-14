@@ -47,18 +47,22 @@ class Report:
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "memberATE":
-            query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date, R.idReport " \
-                    "FROM Report R INNER JOIN MemberATE MA ON R.idMemberATE = MA.idMemberATE " \
-                    "WHERE MA.name = %s;"
+            query = "SELECT R.idReport, R.reason, S.name, MA.name AS nameMember, MA.lastName, " \
+                    "R.date, R.idReport FROM Report R INNER JOIN Service S ON " \
+                    "R.idService = S.idService INNER JOIN  MemberATE MA " \
+                    "ON R.idMemberATE = MA.idMemberATE WHERE MA.name = %s;"
         else:
             if criterion == "service":
-                query = "SELECT R.idReport, R.reason, R.idMemberATE, R.idService, R.date, R.idReport " \
-                        "FROM Report R INNER JOIN Service S ON R.idService = S.idService " \
-                        "WHERE S.name = %s;"
+                query = "SELECT R.idReport, R.reason, S.name, MA.name AS nameMember, MA.lastName, " \
+                        "R.date, R.idReport FROM Report R INNER JOIN Service S ON " \
+                        "R.idService = S.idService INNER JOIN  MemberATE MA " \
+                        "ON R.idMemberATE = MA.idMemberATE WHERE S.name = %s;"
             else:
                 if criterion == "date":
-                    query = "SELECT idReport, reason, idMemberATE, idService, date, R.idReport " \
-                            "FROM Report WHERE date = %s;"
+                    query = "SELECT R.idReport, R.reason, S.name, MA.name AS nameMember, MA.lastName, " \
+                            "R.date, R.idReport FROM Report R INNER JOIN Service S ON " \
+                            "R.idService = S.idService INNER JOIN  MemberATE MA " \
+                            "ON R.idMemberATE = MA.idMemberATE WHERE date = %s;"
         param = [filter_search]
         if query is not None:
             list_reports = self.connect.select(query, param)
@@ -66,11 +70,11 @@ class Report:
                 reports_list = []
                 for reports in list_reports:
                     report = Report()
-                    report.id_service = reports["idService"]
+                    report.id_service = reports["name"]
                     report.reason = reports["reason"]
                     report.date = reports["date"]
                     report.date = report.date.strftime('%Y/%m/%d')
-                    report.id_memberATE = reports["idMemberATE"]
+                    report.id_memberATE = reports["nameMember"] + " " + reports["lastName"]
                     report.id_report = reports["idReport"]
                     reports_list.append(report)
                 results = reports_list
@@ -100,5 +104,5 @@ class Report:
         return results
 
     def json_report(self):
-        return {"idReport": self.id_report, "reason": self.reason,
+        return {"idReport": self.id_report, "reason": self.reason, "date": self.date,
                 "idService": self.id_service, "idMemberATE": self.id_memberATE}
