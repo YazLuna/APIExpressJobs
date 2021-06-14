@@ -43,7 +43,7 @@ def add_chat():
 @Auth.requires_token
 def get_chats(id_member, member_type):
     """This function fetches a memberATE's chats."""
-    json_validator = {"idMember": id_member, "member_type": member_type}
+    json_validator = {"idMember": id_member, "memberType": member_type}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_find_chats.is_valid(json_validator):

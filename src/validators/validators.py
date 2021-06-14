@@ -181,7 +181,7 @@ validator_request_client = Schema({
 
 validator_find_chats = Schema({
     'idMember': And(str, Regex(r'^[0-9]{1,10}$')),
-    'member_type': And(str, Regex(r'^[A-Za-z]{6,8}$')),
+    'memberType': And(str, Regex(r'^[A-Za-z]{6,8}$')),
 })
 
 validator_chat = Schema({
