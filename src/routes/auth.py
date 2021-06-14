@@ -96,7 +96,7 @@ class Auth:
         timestamp = datetime.now().strftime("%H:%M:%S")
         value: str = account.username + "/"
         value += account.password + "/"
-        value += get_member_type(account.memberATE_type) + "/"
+        value += get_member_type(account.member_ate_type) + "/"
         value += timestamp
         return Auth.encode(value, Auth.secret_password)
 

@@ -25,7 +25,7 @@ def add_message():
             message_add = Message()
             message_add.message = json_values["message"]
             message_add.id_chat = json_values["idChat"]
-            message_add.memberType = json_values["memberATEType"]
+            message_add.member_type = json_values["memberATEType"]
             result = message_add.add_message()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(message_add.json_message()),

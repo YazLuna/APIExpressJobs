@@ -22,8 +22,8 @@ def add_employee_account(id_account):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_id.is_valid({"id": id_account}):
         account_status = Account()
-        account_status.id_memberATE = id_account
-        account_status.memberATE_type = AccountRole.CLIENT_EMPLOYEE.value
+        account_status.id_member_ate = id_account
+        account_status.member_ate_type = AccountRole.CLIENT_EMPLOYEE.value
         result = account_status.add_employee_account()
         if result == ResponsesREST.SUCCESSFUL.value:
             response = Response(status=result)

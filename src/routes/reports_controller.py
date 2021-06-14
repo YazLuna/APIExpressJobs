@@ -27,7 +27,7 @@ def add_report():
             report_add = Report()
             report_add.reason = json_values["reason"]
             report_add.id_service = json_values["idService"]
-            report_add.id_memberATE = json_values["idMemberATE"]
+            report_add.id_member_ate = json_values["idMemberATE"]
             result = report_add.add_report()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(report_add.json_report()),

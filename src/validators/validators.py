@@ -7,7 +7,7 @@ validator_memberATE = Schema({
     'password': And(Use(str), lambda e: 254 > len(e) > 5),
     'name': And(str,
                 Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
-    'lastName': And(str,
+    'lastname': And(str,
                     Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
     'dateBirth': And(str, Regex(r'^((19|20)\d\d)/(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])$')),
     'email': And(Use(str),
@@ -28,7 +28,7 @@ validator_memberATE_change = Schema({
     'username': And(str, Regex(r'^[A-Za-z0-9]{3,20}$')),
     'name': And(str,
                 Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
-    'lastName': And(str,
+    'lastname': And(str,
                     Regex(r'^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{2,150}')),
     'dateBirth': And(str,
                      Regex(r'^((19|20)\d\d)/(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])$')),
@@ -181,7 +181,7 @@ validator_request_client = Schema({
 
 validator_find_chats = Schema({
     'idMember': And(str, Regex(r'^[0-9]{1,10}$')),
-    'memberType': And(str, Regex(r'^[A-Za-z]{6,8}$')),
+    'member_type': And(str, Regex(r'^[A-Za-z]{6,8}$')),
 })
 
 validator_chat = Schema({

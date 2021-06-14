@@ -33,7 +33,7 @@ def add_resource():
                 resource_server.is_main_resource = resource_save["isMainResource"]
                 resource_server.name = resource_save["name"]
                 resource_server.id_service = int(resource_save["idService"])
-                resource_server.id_memberATE = int(resource_save["idMemberATE"])
+                resource_server.id_member_ate = int(resource_save["idMemberATE"])
                 resource_server.resource_file = resource_add[0]
                 result = resource_server.add_resource_server()
                 if result == ResponsesREST.CREATED.value:
@@ -114,7 +114,7 @@ def find_resource_main_member_ate(member_ate_id):
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_id.is_valid({'id': member_ate_id}):
         get_resources_member = Resource()
-        get_resources_member.id_memberATE = member_ate_id
+        get_resources_member.id_member_ate = member_ate_id
         result = get_resources_member.get_main_resource_account()
         if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
             response = Response(json.dumps(json_error(result)),

@@ -26,7 +26,7 @@ def add_chat():
         if validator_chat.is_valid(json_values):
             chat_add = Chat()
             chat_add.id_service = json_values["idService"]
-            chat_add.id_memberATE = json_values["idMemberATEClient"]
+            chat_add.id_member_ate = json_values["idMemberATEClient"]
             chat_add.id_request = json_values["idRequest"]
             result = chat_add.add_chat()
             if result == ResponsesREST.CREATED.value:
@@ -43,12 +43,12 @@ def add_chat():
 @Auth.requires_token
 def get_chats(id_member, member_type):
     """This function fetches a memberATE's chats."""
-    json_validator = {"idMember": id_member, "memberType": member_type}
+    json_validator = {"idMember": id_member, "member_type": member_type}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if validator_find_chats.is_valid(json_validator):
         get_chat = Chat()
-        get_chat.id_memberATE = id_member
+        get_chat.id_member_ate = id_member
         result = get_chat.find_chats(member_type)
         if result in (ResponsesREST.NOT_FOUND.value,
                       ResponsesREST.SERVER_ERROR.value, ResponsesREST.INVALID_INPUT.value):

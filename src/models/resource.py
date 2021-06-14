@@ -1,4 +1,5 @@
-from src.connect_database.Connection import Connection
+"""This module manages the resources."""
+from src.connect_database.connection_database import Connection
 from src.connect_file_server.resource_services import ConnectServerResource
 from src.models.resource_type import ResourceType
 from src.routes.responses_rest import ResponsesREST
@@ -6,17 +7,20 @@ from src.services.thrift.ttypes import Resource as ResourceStruct
 
 
 class Resource:
+    """This class manages the resources."""
+
     def __init__(self):
         self.id_resource = ""
         self.is_main_resource = ""
         self.route_save = ""
         self.name = ""
         self.id_service = 0
-        self.id_memberATE = 0
+        self.id_member_ate = 0
         self.resource_file = None
         self.connect = Connection.build_from_static()
 
     def add_resource(self):
+        """This function adds a resource to the database."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "INSERT INTO Resource (isMainResource, routeSave, name, idService, idMemberATE) " \
                 "VALUES (%s, %s, %s, %s, %s); "
@@ -24,7 +28,7 @@ class Resource:
                  self.route_save,
                  self.name,
                  self.id_service,
-                 self.id_memberATE]
+                 self.id_member_ate]
         result = self.connect.send_query(query, param)
         if result:
             self.id_resource = self.get_id()
@@ -32,6 +36,7 @@ class Resource:
         return results
 
     def get_id(self):
+        """This function gets the ID of the created resource."""
         query = "SELECT idResource FROM Resource order by idResource desc limit 1;"
         response = self.connect.select(query)
         resource = Resource()
@@ -41,8 +46,10 @@ class Resource:
         return resource.id_resource
 
     def add_resource_server(self):
+        """This function adds a resource to the file server."""
         response = ResponsesREST.SERVER_ERROR.value
-        if (self.id_service == 0 and self.id_memberATE == 0) or (self.id_service != 0 and self.id_memberATE != 0):
+        if (self.id_service == 0 and self.id_member_ate == 0) or \
+                (self.id_service != 0 and self.id_member_ate != 0):
             response = ResponsesREST.INVALID_INPUT.value
         else:
             self.route_save = self.get_route()
@@ -50,7 +57,7 @@ class Resource:
             resource_struct = ResourceStruct()
             resource_struct.name = self.name
             resource_struct.idService = self.id_service
-            resource_struct.idMemberATE = self.id_memberATE
+            resource_struct.idMemberATE = self.id_member_ate
             resource_struct.isMainResource = self.is_main_resource
             resource_struct.routeSave = self.route_save
             resource_struct.resourceFile = self.resource_file.read()
@@ -60,16 +67,18 @@ class Resource:
         return response
 
     def get_route(self):
+        """This function generates the save path of a file."""
         ext = self.resource_file.filename.split(".")[-1]
         route = "s" + str(self.id_service) + self.name + "." + ext
         if self.id_service == 0:
-            route = "m" + str(self.id_memberATE) + self.name + "." + ext
+            route = "m" + str(self.id_member_ate) + self.name + "." + ext
             self.id_service = None
         else:
-            self.id_memberATE = None
+            self.id_member_ate = None
         return route
 
     def get_resource_server(self):
+        """This function gets a resource from the file server."""
         response = ResponsesREST.SERVER_ERROR.value
         connect = ConnectServerResource()
         resource_struct = connect.consult_resource(self.route_save)
@@ -80,6 +89,7 @@ class Resource:
         return response
 
     def get_resource(self):
+        """This function gets a resource from the database."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
                 " FROM Resource WHERE idResource = %s"
@@ -91,7 +101,7 @@ class Resource:
             self.is_main_resource = resource_found["isMainResource"]
             self.route_save = resource_found["routeSave"]
             self.name = resource_found["name"]
-            self.id_memberATE = resource_found["idMemberATE"]
+            self.id_member_ate = resource_found["idMemberATE"]
             self.id_service = resource_found["idService"]
             results = self
         else:
@@ -99,6 +109,7 @@ class Resource:
         return results
 
     def get_resource_list(self):
+        """This function gets a resource list from the database."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
                 " FROM Resource WHERE idService = %s"
@@ -112,7 +123,7 @@ class Resource:
                 resource.is_main_resource = resource_found["isMainResource"]
                 resource.route_save = resource_found["routeSave"]
                 resource.name = resource_found["name"]
-                resource.id_memberATE = resource_found["idMemberATE"]
+                resource.id_member_ate = resource_found["idMemberATE"]
                 resource.id_service = resource_found["idService"]
                 resource_list.append(resource)
             results = resource_list
@@ -121,6 +132,7 @@ class Resource:
         return results
 
     def get_main_resource(self):
+        """This function gets the main resource of the service."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
                 " FROM Resource WHERE idService = %s AND isMainResource = %s;"
@@ -134,7 +146,7 @@ class Resource:
             resource.is_main_resource = resource_list["isMainResource"]
             resource.route_save = resource_list["routeSave"]
             resource.name = resource_list["name"]
-            resource.id_memberATE = resource_list["idMemberATE"]
+            resource.id_member_ate = resource_list["idMemberATE"]
             resource.id_service = resource_list["idService"]
             results = resource
         else:
@@ -142,11 +154,12 @@ class Resource:
         return results
 
     def get_main_resource_account(self):
+        """This function gets the main resource of the memberATE."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idResource, isMainResource, routeSave, name, idMemberATE, idService" \
                 " FROM Resource WHERE idMemberATE = %s AND isMainResource = %s;"
         self.is_main_resource = ResourceType.MAIN_RESOURCE.value
-        param = [self.id_memberATE, self.is_main_resource]
+        param = [self.id_member_ate, self.is_main_resource]
         list_resource = self.connect.select(query, param)
         if list_resource:
             resource_list = list_resource[0]
@@ -155,7 +168,7 @@ class Resource:
             resource.is_main_resource = resource_list["isMainResource"]
             resource.route_save = resource_list["routeSave"]
             resource.name = resource_list["name"]
-            resource.id_memberATE = resource_list["idMemberATE"]
+            resource.id_member_ate = resource_list["idMemberATE"]
             resource.id_service = resource_list["idService"]
             results = resource
         else:
@@ -163,6 +176,7 @@ class Resource:
         return results
 
     def delete_resource(self):
+        """This function removes a resource from the database."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "DELETE FROM Resource WHERE routeSave = %s; "
         param = [self.route_save]
@@ -172,6 +186,7 @@ class Resource:
         return results
 
     def delete_resource_server(self):
+        """This function removes a resource from the file server."""
         response = ResponsesREST.SERVER_ERROR.value
         connect = ConnectServerResource()
         response = connect.delete_resource(self.route_save)
@@ -180,6 +195,7 @@ class Resource:
         return response
 
     def json_resource(self):
+        """This function returns the resource data in JSON serializable format."""
         return {"idResource": self.id_resource, "isMainResource": self.is_main_resource,
                 "name": self.name, "routeSave": self.route_save, "idService": self.id_service,
-                "idMemberATE": self.id_memberATE}
+                "idMemberATE": self.id_member_ate}
