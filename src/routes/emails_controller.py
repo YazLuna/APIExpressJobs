@@ -4,7 +4,9 @@ import json
 from flask import Blueprint, request, Response
 
 from src.models.account import Account, create_code
+from src.models.account_role import AccountRole
 from src.models.email import Email
+from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
 from src.validators.validators import validator_email, validator_email_account
@@ -34,6 +36,8 @@ def send_message_to_account():
 
 
 @email.route("/emails/account", methods=["POST"])
+@Auth.requires_token
+@Auth.requires_role(AccountRole.MANAGER.name)
 def send_message_to_email():
     """This function sends a message to an email with the reason for its blocking, unblocking."""
     json_values = request.json

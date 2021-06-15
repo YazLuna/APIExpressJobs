@@ -179,6 +179,11 @@ validator_request_client = Schema({
     'isClient': And(str, Regex(r'^[0-9]{1,10}$'))
 })
 
+validator_request_criterion = Schema({
+    'id': And(str, Regex(r'^[0-9]{1,10}$')),
+    "criterion": And(str)
+})
+
 validator_find_chats = Schema({
     'idMember': And(str, Regex(r'^[0-9]{1,10}$')),
     'memberType': And(str, Regex(r'^[A-Za-z]{6,8}$')),
