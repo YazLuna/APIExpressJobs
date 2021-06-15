@@ -79,6 +79,24 @@ class Account:
             response = ResponsesREST.NOT_FOUND.value
         return response
 
+    def validate_change_password(self, code):
+        """This function change the password."""
+        response = ResponsesREST.SERVER_ERROR.value
+        if self.exist_account_to_validate_password(code):
+            query = "UPDATE MemberATE SET codeChangePassword = %s, code = %s, password = %s " \
+                    "WHERE codeChangePassword = %s AND email = %s"
+            param = [None,
+                     None,
+                     self.password,
+                     code,
+                     self.email]
+            result = self.connect.send_query(query, param)
+            if result:
+                response = ResponsesREST.SUCCESSFUL.value
+        else:
+            response = ResponsesREST.NOT_FOUND.value
+        return response
+
     def exist_account_to_validate(self, code):
         """This function checks if this account exists in order to validate it."""
         result = False
@@ -86,6 +104,18 @@ class Account:
                 "AND code = %s"
         param = [self.password,
                  self.username,
+                 code]
+        list_accounts = self.connect.select(query, param)
+        if list_accounts:
+            result = True
+        return result
+
+    def exist_account_to_validate_password(self, code):
+        """This function checks if this account exists to validate new password change."""
+        result = False
+        query = "SELECT idMemberATE FROM MemberATE WHERE email = %s " \
+                "AND codeChangePassword = %s"
+        param = [self.email,
                  code]
         list_accounts = self.connect.select(query, param)
         if list_accounts:
@@ -111,10 +141,36 @@ class Account:
             results = ResponsesREST.NOT_FOUND.value
         return results
 
+    def send_code_password(self, code):
+        """This function sends the validation code to change the password to the
+            email and saves it in the database."""
+        results = ResponsesREST.SERVER_ERROR.value
+        if self.email_change_password_exists():
+            query = "UPDATE MemberATE SET codeChangePassword = %s WHERE email = %s "
+            param = [code,
+                     self.email]
+            result = self.connect.send_query(query, param)
+            if result:
+                self.send_message(code)
+                results = ResponsesREST.SUCCESSFUL.value
+        else:
+            results = ResponsesREST.NOT_FOUND.value
+        return results
+
     def email_exists(self):
         """This function checks if the email is not validated."""
         result = False
         query = "SELECT idMemberATE FROM MemberATE WHERE email = %s AND code IS NOT NULL;"
+        param = [self.email]
+        response = self.connect.select(query, param)
+        if response:
+            result = True
+        return result
+
+    def email_change_password_exists(self):
+        """This function checks if the email to change password exists."""
+        result = False
+        query = "SELECT idMemberATE FROM MemberATE WHERE email = %s;"
         param = [self.email]
         response = self.connect.select(query, param)
         if response:

@@ -10,7 +10,8 @@ from src.models.password import encode_password
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_login, validator_login_validator
+from src.validators.validators import validator_login, validator_login_validator, \
+    validator_login_password
 
 login = Blueprint("Logins", __name__)
 
@@ -91,3 +92,26 @@ def validate_account():
                 response = Response(json.dumps(json_error(result)),
                                     status=result, mimetype="application/json")
     return response
+
+
+@login.route("/logins/validatePassword", methods=["PATCH"])
+def validate_change_password():
+    """This function changes the password of an account based on the
+     confirmation code."""
+    json_values = request.json
+    values_required = {"email", "password", "code"}
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if all(key in json_values for key in values_required):
+        if validator_login_password.is_valid(json_values):
+            account_login = Account()
+            account_login.email = json_values["email"]
+            account_login.password = encode_password(json_values["password"])
+            result = account_login.validate_change_password(json_values["code"])
+            if result == ResponsesREST.SUCCESSFUL.value:
+                response = Response(status=result)
+            else:
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
+    return response
+
