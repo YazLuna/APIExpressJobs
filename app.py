@@ -1,4 +1,5 @@
-from datetime import timedelta, date
+"""This module initializes the API in Flask."""
+from datetime import timedelta
 
 from flask import Flask
 from flask_cors import CORS
@@ -42,6 +43,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=15)
 
 @app.route('/')
 def hello_world():
+    """This function initializes the API in Flask."""
     return 'Hello World!'
 
 

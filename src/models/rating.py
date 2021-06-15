@@ -1,8 +1,11 @@
-from src.connect_database.Connection import Connection
+"""This module manages the ratings."""
+from src.connect_database.connection_database import Connection
 from src.routes.responses_rest import ResponsesREST
 
 
 class Rating:
+    """This class manages the ratings."""
+
     def __init__(self):
         self.id_rating = ""
         self.comment = ""
@@ -12,8 +15,10 @@ class Rating:
         self.connect = Connection.build_from_static()
 
     def add_rating(self):
+        """This function adds a rating."""
         results = ResponsesREST.SERVER_ERROR.value
-        query = "INSERT INTO Rating (comment, rating, idRequest, isClient) VALUES ( %s, %s, %s, %s); "
+        query = "INSERT INTO Rating (comment, rating, idRequest, isClient) " \
+                "VALUES ( %s, %s, %s, %s); "
         param = [self.comment,
                  self.rating,
                  self.id_request,
@@ -25,6 +30,7 @@ class Rating:
         return results
 
     def get_id(self):
+        """This function gets the ID of the created request."""
         query = "SELECT idRating FROM Rating order by idRating desc limit 1;"
         response = self.connect.select(query)
         rating = Rating()
@@ -78,6 +84,7 @@ class Rating:
         return results
 
     def find_ratings_request(self):
+        """This function gets the list of ratings from a request."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, R.isClient FROM Rating R " \
                 "WHERE R.idRequest = %s AND R.isClient= %s;"
@@ -100,5 +107,6 @@ class Rating:
         return results
 
     def json_rating(self):
+        """This function returns the rating data in JSON serializable format."""
         return {"idRating": self.id_rating, "comment": self.comment, "isClient": self.is_client,
                 "rating": self.rating, "idRequest": self.id_request}

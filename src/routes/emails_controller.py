@@ -55,3 +55,25 @@ def send_message_to_email():
                 response = Response(json.dumps(json_error(result)), status=result,
                                     mimetype="application/json")
     return response
+
+
+@email.route("/emails/password", methods=["POST"])
+def send_message_to_change_password():
+    """This function sends the validation code to change the password to the
+     email and saves it in the database."""
+    json_values = request.json
+    values = {"email"}
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if all(key in json_values for key in values):
+        if validator_email.is_valid(json_values):
+            account = Account()
+            account.email = json_values["email"]
+            result = account.send_code_password(create_code())
+            if result == ResponsesREST.SUCCESSFUL.value:
+                response = Response(json.dumps({"email": account.email}),
+                                    status=result, mimetype="application/json")
+            else:
+                response = Response(json.dumps(json_error(result)),
+                                    status=result, mimetype="application/json")
+    return response

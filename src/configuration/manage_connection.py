@@ -1,9 +1,13 @@
+"""This module manages the connection to the configuration server."""
 import json
 
 
 class ManageConnection:
+    """This class manages the connection to the configuration server."""
+
     @staticmethod
     def get_connection(key):
+        """This function obtains the connection to the configuration server."""
         information = None
         with open("src/configuration/connection.json") as json_file:
             data = json.load(json_file)
@@ -13,6 +17,7 @@ class ManageConnection:
 
     @staticmethod
     def set_data(key, new_data) -> bool:
+        """This function connects to the configuration server."""
         save_data = False
         with open("src/configuration/connection.json") as json_file:
             data_origin = json.load(json_file)

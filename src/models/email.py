@@ -1,3 +1,4 @@
+"""This module manages the sending of messages to the email."""
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -6,8 +7,11 @@ from src.routes.responses_rest import ResponsesREST
 
 
 class Email:
+    """This class manages the sending of messages to the email."""
+
     @staticmethod
     def send_email(email, message_send):
+        """This function sends the verification code to an email."""
         result = ResponsesREST.SERVER_ERROR.value
         msg = MIMEMultipart()
 
@@ -35,6 +39,7 @@ class Email:
 
     @staticmethod
     def send_message_email(message_send, email):
+        """This function sends a message to an email."""
         result = ResponsesREST.SERVER_ERROR.value
         msg = MIMEMultipart()
 

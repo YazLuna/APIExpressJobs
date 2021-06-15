@@ -1,14 +1,18 @@
-from src.connect_database.Connection import Connection
+"""This module manages the countries."""
+from src.connect_database.connection_database import Connection
 from src.routes.responses_rest import ResponsesREST
 
 
 class Country:
+    """This class manages the countries."""
+
     def __init__(self):
         self.id_country = ""
         self.name = ""
         self.connect = Connection.build_from_static()
 
     def get_country(self):
+        """This function sets a country according to your ID."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCountry, name FROM Country WHERE idCountry = %s;"
         param = [self.id_country]
@@ -24,6 +28,7 @@ class Country:
         return results
 
     def find_countries(self):
+        """This function finds all countries."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT idCountry, name FROM Country;"
         list_countries = self.connect.select(query)
@@ -40,4 +45,5 @@ class Country:
         return results
 
     def json_country(self):
+        """This function returns the country data in JSON serializable format."""
         return {"idCountry": self.id_country, "name": self.name}
