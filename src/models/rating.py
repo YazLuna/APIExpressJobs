@@ -39,7 +39,8 @@ class Rating:
             rating.id_rating = id_list["idRating"]
         return rating.id_rating
 
-    def find_ratings(self, id, criterion):
+    def find_ratings(self, id_search, criterion):
+        """This function finds the list of ratings according to a filter."""
         results = ResponsesREST.SERVER_ERROR.value
         query = None
         if criterion == "memberATE":
@@ -49,11 +50,11 @@ class Rating:
                     "WHERE Rq.idMember = %s AND isClient=1;"
         else:
             if criterion == "service":
-                query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, MA.name, MA.lastName FROM Rating R " \
-                        "INNER JOIN Request Rq ON R.idRequest = Rq.idRequest " \
-                        "INNER JOIN MemberATE MA ON Rq.idMember = MA.idMemberATE " \
-                        "WHERE Rq.idService = %s AND isClient=2;"
-        param = [id]
+                query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, MA.name, " \
+                        "MA.lastName FROM Rating R INNER JOIN Request Rq ON R.idRequest " \
+                        "= Rq.idRequest INNER JOIN MemberATE MA ON Rq.idMember = " \
+                        "MA.idMemberATE WHERE Rq.idService = %s AND isClient=2;"
+        param = [id_search]
         if query is not None:
             list_ratings = self.connect.select(query, param)
             if list_ratings:
