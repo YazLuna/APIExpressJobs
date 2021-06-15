@@ -3,12 +3,11 @@ import json
 
 from flask import Blueprint, request, Response
 
-from src.models.account_role import AccountRole
 from src.models.rating import Rating
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_rating, validator_id, validator_request_client, \
+from src.validators.validators import validator_rating, validator_request_client, \
     validator_request_criterion
 
 rating = Blueprint("Ratings", __name__)
@@ -40,21 +39,24 @@ def add_rating():
     return response
 
 
-@rating.route("/ratings/<id>/<criterion>", methods=["GET"])
+@rating.route("/ratings/<id_search>/<criterion>", methods=["GET"])
 @Auth.requires_token
-def find_ratings(id, criterion):
+def find_ratings(id_search, criterion):
+    """This function finds the list of ratings according to a filter."""
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_request_criterion.is_valid({"id": id, "criterion": criterion}):
+    if validator_request_criterion.is_valid({"id": id_search, "criterion": criterion}):
         get_ratings = Rating()
-        result = get_ratings.find_ratings(id,criterion)
-        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
-            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
+        result = get_ratings.find_ratings(id_search, criterion)
+        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
+            response = Response(json.dumps(json_error(result)),
+                                status=result, mimetype="application/json")
         else:
             list_ratings = []
             for ratings_found in result:
                 list_ratings.append(ratings_found.json_rating())
-            response = Response(json.dumps(list_ratings), status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps(list_ratings),
+                                status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
 
