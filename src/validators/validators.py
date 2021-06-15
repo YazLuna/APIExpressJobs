@@ -51,6 +51,13 @@ validator_login_validator = Schema({
     'code': And(Use(int), lambda t: 1000000 <= t <= 9999999),
 })
 
+validator_login_password = Schema({
+    'email': And(Use(str),
+                 Regex(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b'), lambda e: 255 > len(e) > 4),
+    'password': And(Use(str), lambda e: 254 > len(e) > 5),
+    'code': And(Use(int), lambda t: 1000000 <= t <= 9999999)
+})
+
 validator_change_status_member = Schema({
     'idAccount': And(str, Regex(r'^[0-9]{1,10}$')),
     'memberATEStatus': And(Use(int), lambda s: 0 < s < 4),
