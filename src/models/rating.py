@@ -39,27 +39,48 @@ class Rating:
             rating.id_rating = id_list["idRating"]
         return rating.id_rating
 
-    def find_ratings(self, id_service):
-        """This function gets the list of ratings from a service."""
+    def find_ratings(self, id, criterion):
         results = ResponsesREST.SERVER_ERROR.value
-        query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, R.isClient FROM Rating R " \
-                "INNER JOIN Request Rq ON R.idRequest = Rq.idRequest " \
-                "WHERE Rq.idService = %s;"
-        param = [id_service]
-        list_ratings = self.connect.select(query, param)
-        if list_ratings:
-            rating_list = []
-            for ratings in list_ratings:
-                rating = Rating()
-                rating.id_rating = ratings["idRating"]
-                rating.comment = ratings["comment"]
-                rating.rating = ratings["rating"]
-                rating.id_request = ratings["idRequest"]
-                rating.is_client = ratings["isClient"]
-                rating_list.append(rating)
-            results = rating_list
+        query = None
+        if criterion == "memberATE":
+            query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, S.name FROM Rating R " \
+                    "INNER JOIN Request Rq ON R.idRequest = Rq.idRequest " \
+                    "INNER JOIN Service S ON Rq.idService = S.idService " \
+                    "WHERE Rq.idMember = %s AND isClient=1;"
         else:
-            results = ResponsesREST.NOT_FOUND.value
+            if criterion == "service":
+                query = "SELECT R.idRating, R.comment, R.rating, R.idRequest, MA.name, MA.lastName FROM Rating R " \
+                        "INNER JOIN Request Rq ON R.idRequest = Rq.idRequest " \
+                        "INNER JOIN MemberATE MA ON Rq.idMember = MA.idMemberATE " \
+                        "WHERE Rq.idService = %s AND isClient=2;"
+        param = [id]
+        if query is not None:
+            list_ratings = self.connect.select(query, param)
+            if list_ratings:
+                rating_list = []
+                if criterion == "memberATE":
+                    for ratings in list_ratings:
+                        rating = Rating()
+                        rating.id_rating = ratings["idRating"]
+                        rating.comment = ratings["comment"]
+                        rating.rating = ratings["rating"]
+                        rating.id_request = ratings["idRequest"]
+                        rating.is_client = ratings["name"]
+                        rating_list.append(rating)
+                else:
+                    for ratings in list_ratings:
+                        rating = Rating()
+                        rating.id_rating = ratings["idRating"]
+                        rating.comment = ratings["comment"]
+                        rating.rating = ratings["rating"]
+                        rating.id_request = ratings["idRequest"]
+                        rating.is_client = ratings["name"] + " " + ratings["lastName"]
+                        rating_list.append(rating)
+                results = rating_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
         return results
 
     def find_ratings_request(self):

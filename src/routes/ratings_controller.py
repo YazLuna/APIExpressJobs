@@ -8,7 +8,8 @@ from src.models.rating import Rating
 from src.routes.auth import Auth
 from src.routes.exception_responses_json import json_error
 from src.routes.responses_rest import ResponsesREST
-from src.validators.validators import validator_rating, validator_id, validator_request_client
+from src.validators.validators import validator_rating, validator_id, validator_request_client, \
+    validator_request_criterion
 
 rating = Blueprint("Ratings", __name__)
 
@@ -39,25 +40,21 @@ def add_rating():
     return response
 
 
-@rating.route("/ratings/<id_service>", methods=["GET"])
+@rating.route("/ratings/<id>/<criterion>", methods=["GET"])
 @Auth.requires_token
-@Auth.requires_role(AccountRole.CLIENT.name)
-def find_ratings(id_service):
-    """This function retrieves all the ratings of a service."""
+def find_ratings(id, criterion):
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
-    if validator_id.is_valid({"id": id_service}):
+    if validator_request_criterion.is_valid({"id": id, "criterion": criterion}):
         get_ratings = Rating()
-        result = get_ratings.find_ratings(id_service)
-        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value):
-            response = Response(json.dumps(json_error(result)),
-                                status=result, mimetype="application/json")
+        result = get_ratings.find_ratings(id,criterion)
+        if result == ResponsesREST.NOT_FOUND.value or result == ResponsesREST.SERVER_ERROR.value:
+            response = Response(json.dumps(json_error(result)), status=result, mimetype="application/json")
         else:
             list_ratings = []
             for ratings_found in result:
                 list_ratings.append(ratings_found.json_rating())
-            response = Response(json.dumps(list_ratings),
-                                status=ResponsesREST.SUCCESSFUL.value,
+            response = Response(json.dumps(list_ratings), status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
 
