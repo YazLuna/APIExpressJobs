@@ -109,7 +109,7 @@ validator_message = Schema({
     'message': And(Use(str), Regex(
         r'^[a-zA-ZÀ-ÿ\u00f1\u00d10-9#@$!%&/~^.,;:^_{}()=?¡¿/*-+|><°\U00010000-\U0010ffff]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d10-9#@$!%&/~.,;:^_{}()=?¡¿/*-+|><°\U00010000-\U0010ffff]*){1,}'),
                    lambda e: len(e) > 0),
-    'memberATEType': And(Use(int), lambda r: 0 < r < 3),
+    'memberType': And(Use(int), lambda r: 0 < r < 3),
     'idChat': And(int),
 })
 
