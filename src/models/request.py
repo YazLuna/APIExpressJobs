@@ -108,7 +108,7 @@ class Request:
                 else:
                     for requests in list_request:
                         request = Request()
-                        request.id_service = requests["idMemberATE"]
+                        request.id_service = requests["idMember"]
                         request.id_request = requests["idRequest"]
                         request.id_member_ate = requests["name"] + " " + requests["lastname"]
                         request.address = requests["address"]
@@ -118,6 +118,37 @@ class Request:
                         request.date = request.date.strftime('%Y/%m/%d')
                         request.trouble = requests["trouble"]
                         request_list.append(request)
+                results = request_list
+            else:
+                results = ResponsesREST.NOT_FOUND.value
+        else:
+            results = ResponsesREST.INVALID_INPUT.value
+        return results
+
+    def find_request_service(self, service_id):
+        """This function obtains the request information according to a filter."""
+        results = ResponsesREST.SERVER_ERROR.value
+        query = "SELECT MA.name, MA.lastname, R.address, R.date, R.requestStatus, " \
+                            "R.time, R.trouble, R.idMember, R.idService, R.idRequest FROM Request R " \
+                            "INNER JOIN Service S ON R.idService = S.idService INNER JOIN MemberATE " \
+                            "MA ON R.idMember = MA.idMemberATE WHERE S.idService = %s;"
+        param = [service_id]
+        if query is not None:
+            list_request = self.connect.select(query, param)
+            if list_request:
+                request_list = []
+                for requests in list_request:
+                    request = Request()
+                    request.id_service = requests["idService"]
+                    request.id_request = requests["idRequest"]
+                    request.id_member_ate = requests["name"] + " " + requests["lastname"]
+                    request.address = requests["address"]
+                    request.request_status = requests["requestStatus"]
+                    request.time = str(requests["time"])
+                    request.date = requests["date"]
+                    request.date = request.date.strftime('%Y/%m/%d')
+                    request.trouble = requests["trouble"]
+                    request_list.append(request)
                 results = request_list
             else:
                 results = ResponsesREST.NOT_FOUND.value

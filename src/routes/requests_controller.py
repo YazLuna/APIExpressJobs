@@ -110,3 +110,26 @@ def get_request_by_id(request_id):
                                 status=ResponsesREST.SUCCESSFUL.value,
                                 mimetype="application/json")
     return response
+
+
+@requestService.route("/requests/services/<service_id>", methods=["GET"])
+@Auth.requires_token
+def find_requests_service(service_id):
+    """This function retrieves the list of requests from the service."""
+    response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
+                        status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
+    if validator_id.is_valid({"id": service_id}):
+        get_request = Request()
+        result = get_request.find_request_service(service_id)
+        if result in (ResponsesREST.NOT_FOUND.value, ResponsesREST.SERVER_ERROR.value,
+                      ResponsesREST.INVALID_INPUT.value):
+            response = Response(json.dumps(json_error(result)),
+                                status=result, mimetype="application/json")
+        else:
+            list_requests = []
+            for request_found in result:
+                list_requests.append(request_found.json_request())
+            response = Response(json.dumps(list_requests),
+                                status=ResponsesREST.SUCCESSFUL.value,
+                                mimetype="application/json")
+    return response

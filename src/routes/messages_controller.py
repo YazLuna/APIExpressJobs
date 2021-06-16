@@ -17,7 +17,7 @@ message = Blueprint("Messages", __name__)
 def add_message():
     """This function add a message to chat."""
     json_values = request.json
-    values_required = {"message", "idChat", "memberATEType"}
+    values_required = {"message", "idChat", "memberType"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
@@ -25,7 +25,7 @@ def add_message():
             message_add = Message()
             message_add.message = json_values["message"]
             message_add.id_chat = json_values["idChat"]
-            message_add.member_type = json_values["memberATEType"]
+            message_add.member_type = json_values["memberType"]
             result = message_add.add_message()
             if result == ResponsesREST.CREATED.value:
                 response = Response(json.dumps(message_add.json_message()),
