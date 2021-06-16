@@ -129,9 +129,9 @@ class Request:
         """This function obtains the request information according to a filter."""
         results = ResponsesREST.SERVER_ERROR.value
         query = "SELECT MA.name, MA.lastname, R.address, R.date, R.requestStatus, " \
-                            "R.time, R.trouble, R.idMember, R.idService, R.idRequest FROM Request R " \
-                            "INNER JOIN Service S ON R.idService = S.idService INNER JOIN MemberATE " \
-                            "MA ON R.idMember = MA.idMemberATE WHERE S.idService = %s;"
+                "R.time, R.trouble, R.idMember, R.idService, R.idRequest FROM Request R " \
+                "INNER JOIN Service S ON R.idService = S.idService INNER JOIN MemberATE " \
+                "MA ON R.idMember = MA.idMemberATE WHERE S.idService = %s;"
         param = [service_id]
         if query is not None:
             list_request = self.connect.select(query, param)
