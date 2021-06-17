@@ -24,7 +24,7 @@ def add_request():
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
-        if validator_request.validate(json_values):
+        if validator_request.is_valid(json_values):
             request_add = Request()
             request_add.address = json_values["address"]
             request_add.date = json_values["date"]
