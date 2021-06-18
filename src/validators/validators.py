@@ -199,7 +199,7 @@ validator_find_chats = Schema({
 validator_chat = Schema({
     Optional("idChat"): And(int),
     "idService": And(int),
-    "idMember": And(int),
+    "idMemberATE": And(int),
     "idRequest": And(int)
 })
 
