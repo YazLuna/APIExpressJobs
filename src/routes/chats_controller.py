@@ -26,7 +26,7 @@ def add_chat():
         if validator_chat.is_valid(json_values):
             chat_add = Chat()
             chat_add.id_service = json_values["idService"]
-            chat_add.id_member_ate = json_values["idMemberATEClient"]
+            chat_add.id_member_ate = json_values["idMemberATE"]
             chat_add.id_request = json_values["idRequest"]
             result = chat_add.add_chat()
             if result == ResponsesREST.CREATED.value:
