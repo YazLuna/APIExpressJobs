@@ -114,4 +114,3 @@ def validate_change_password():
                 response = Response(json.dumps(json_error(result)),
                                     status=result, mimetype="application/json")
     return response
-

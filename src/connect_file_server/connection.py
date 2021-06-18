@@ -10,6 +10,10 @@ from src.services.thrift.ResourcesServices import Client
 class Communication:
     """This class connects to the port where the C # server is running."""
 
+    def __init__(self):
+        self.transport = ""
+        self.connection = ""
+
     def communication_start(self):
         """This function starts communication."""
         config = ConfigServer("expressjobs")

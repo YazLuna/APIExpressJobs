@@ -19,14 +19,14 @@ chat = Blueprint("Chats", __name__)
 def add_chat():
     """This function adds a chat to the database."""
     json_values = request.json
-    values_required = {"idService", "idMemberATEClient", "idRequest"}
+    values_required = {"idService", "idMemberATE", "idRequest"}
     response = Response(json.dumps(json_error(ResponsesREST.INVALID_INPUT.value)),
                         status=ResponsesREST.INVALID_INPUT.value, mimetype="application/json")
     if all(key in json_values for key in values_required):
         if validator_chat.is_valid(json_values):
             chat_add = Chat()
             chat_add.id_service = json_values["idService"]
-            chat_add.id_member_ate = json_values["idMemberATEClient"]
+            chat_add.id_member_ate = json_values["idMemberATE"]
             chat_add.id_request = json_values["idRequest"]
             result = chat_add.add_chat()
             if result == ResponsesREST.CREATED.value:
